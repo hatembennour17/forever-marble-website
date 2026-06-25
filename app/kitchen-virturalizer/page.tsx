@@ -1,0 +1,4 @@
+import type { Metadata } from "next";
+import VisualizerPage from "../components/VisualizerPage";
+export const metadata: Metadata = { title: "Kitchen Countertop Visualizer", description: "Preview countertop, cabinet, floor and backsplash combinations with Forever Marble's interactive kitchen visualizer.", alternates: { canonical: "/kitchen-virturalizer/" } };
+export default function KitchenVisualizer() { return <VisualizerPage eyebrow="Design your kitchen" title="Kitchen Countertop Visualizer" description="Experiment with countertop, cabinet, floor and backsplash combinations before visiting our Philadelphia showroom." embedUrl="https://www.msistone.com/roomscenevisualizer.aspx" embedTitle="Interactive kitchen countertop visualizer by MSI" instructions={["Choose a kitchen scene that feels close to your space.", "Try countertop colors alongside cabinets, flooring and backsplash.", "Save your favorites and compare physical samples in our showroom."]} />; }

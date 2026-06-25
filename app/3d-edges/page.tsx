@@ -1,0 +1,4 @@
+import type { Metadata } from "next";
+import VisualizerPage from "../components/VisualizerPage";
+export const metadata: Metadata = { title: "3D Countertop Edge Profile Visualizer", description: "Compare popular countertop edge profiles in 3D, including eased, beveled, bullnose and decorative options.", alternates: { canonical: "/3d-edges/" } };
+export default function EdgeVisualizer() { return <VisualizerPage eyebrow="Shape the details" title="3D Countertop Edge Profiles" description="Compare edge shapes interactively and see how each profile changes the finished character of your countertop." embedUrl="https://www.msisurfaces.com/countertop-edge-profile/" embedTitle="Interactive 3D countertop edge profile tool by MSI" instructions={["Select an edge profile from the available options.", "Rotate or compare the shape from different views.", "Ask our team which profiles suit your material and project."]} />; }

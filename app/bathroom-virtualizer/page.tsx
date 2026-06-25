@@ -1,0 +1,4 @@
+import type { Metadata } from "next";
+import VisualizerPage from "../components/VisualizerPage";
+export const metadata: Metadata = { title: "Bathroom Countertop Visualizer", description: "Visualize bathroom vanity tops, tile, floors and wall combinations before selecting materials for your project.", alternates: { canonical: "/bathroom-virtualizer/" } };
+export default function BathroomVisualizer() { return <VisualizerPage eyebrow="Design your bathroom" title="Bathroom Countertop Visualizer" description="Explore vanity, wall and floor combinations to build a bathroom palette that works beautifully together." embedUrl="https://www.msisurfaces.com/bathroom-visualizer/" embedTitle="Interactive bathroom surface visualizer by MSI" instructions={["Select a bathroom scene and starting style.", "Mix vanity surfaces, wall tile and flooring.", "Save your ideas and confirm colors with real samples before ordering."]} />; }
