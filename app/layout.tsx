@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import "./globals.css";
 
-const siteUrl = "https://forevermarble.com";
+const siteUrl = "https://forevermarble.net";
 const whatsappUrl = "https://wa.me/12152038666?text=Hi%20Forever%20Marble%2C%20I%27d%20like%20help%20with%20a%20countertop%20project.";
 const socialLinks = [
   { label: "Facebook", href: "https://www.facebook.com/ForeverMarbleandGranite", icon: "facebook" },

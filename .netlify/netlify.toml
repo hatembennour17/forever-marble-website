@@ -1,0 +1,49 @@
+headersOrigin = "config"
+redirects = []
+
+[functions]
+
+[functions."*"]
+
+[[plugins]]
+origin = "default"
+package = "@netlify/plugin-nextjs"
+
+[plugins.inputs]
+
+[build]
+publish = "C:\\Users\\HP\\Documents\\cohens newcastle\\forever-marble-website\\out"
+publishOrigin = "config"
+commandOrigin = "config"
+command = "pnpm build"
+
+[build.environment]
+NODE_VERSION = "22"
+NEXT_TELEMETRY_DISABLED = "1"
+
+[build.processing]
+
+[build.processing.css]
+
+[build.processing.html]
+
+[build.processing.images]
+
+[build.processing.js]
+
+[build.services]
+
+[[headers]]
+for = "/admin/*"
+
+[headers.values]
+X-Robots-Tag = "noindex, nofollow"
+Cache-Control = "no-store"
+
+[[headers]]
+for = "/*"
+
+[headers.values]
+X-Content-Type-Options = "nosniff"
+X-Frame-Options = "SAMEORIGIN"
+Referrer-Policy = "strict-origin-when-cross-origin"
