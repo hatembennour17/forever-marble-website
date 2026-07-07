@@ -5,12 +5,47 @@ import "./globals.css";
 
 const siteUrl = "https://forevermarble.net";
 const whatsappUrl = "https://wa.me/12152038666?text=Hi%20Forever%20Marble%2C%20I%27d%20like%20help%20with%20a%20countertop%20project.";
+
 const socialLinks = [
   { label: "Facebook", href: "https://www.facebook.com/ForeverMarbleandGranite", icon: "facebook" },
   { label: "Instagram", href: "https://www.instagram.com/forevermarble", icon: "instagram" },
   { label: "Houzz", href: "https://bit.ly/fmghouzz", icon: "houzz" },
   { label: "Google Reviews", href: "https://g.page/r/CQa5dWdF6DmHEB0/review", icon: "google" },
 ];
+
+const productMenu = {
+  naturalStones: [
+    { label: "Granite", href: "/granite/" },
+    { label: "Marble", href: "/marble/" },
+    { label: "Quartzite", href: "/quartzite/" },
+    { label: "Precioustone", href: "/natural-stones/precioustone/" },
+    { label: "Travertine", href: "/natural-stones/travertine/" },
+    { label: "Onyx", href: "/natural-stones/onyx/" },
+    { label: "Slate", href: "/natural-stones/slate/" },
+    { label: "Soapstone", href: "/natural-stones/soapstone/" },
+  ],
+  quartz: [
+    { label: "Cambria", href: "/quartz/cambria/" },
+    { label: "Caesarstone", href: "/quartz/caesarstone/" },
+    { label: "Sliestone", href: "/quartz/sliestone/" },
+    { label: "MSI Quartz", href: "/quartz/msi-quartz/" },
+    { label: "Emerstone", href: "/quartz/emerstone/" },
+    { label: "PentalQuartz", href: "/quartz/pentalquartz/" },
+    { label: "One Quartz Surfaces", href: "/quartz/one-quartz-surfaces/" },
+    { label: "Spectrum Quartz", href: "/quartz/spectrum-quartz/" },
+    { label: "Wilsonart", href: "/quartz/wilsonart/" },
+    { label: "Zodiac", href: "/quartz/zodiac/" },
+  ],
+  sinks: [
+    { label: "Kitchen Sinks", href: "/sinks/kitchen-sinks/" },
+    { label: "Bathroom Sinks", href: "/sinks/bathroom-sinks/" },
+    { label: "Bar Sinks", href: "/sinks/bar-sinks/" },
+  ],
+  faucets: [
+    { label: "Bathroom Faucets", href: "/faucets/bathroom-faucets/" },
+    { label: "Kitchen Faucets", href: "/faucets/kitchen-faucets/" },
+  ],
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -38,15 +73,9 @@ const schema = {
 };
 
 function SocialIcon({ icon }: { icon: string }) {
-  if (icon === "facebook") {
-    return <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M14.2 8.1h2.4V4.3c-.4-.1-1.8-.2-3.4-.2-3.4 0-5.7 2.1-5.7 6v3.4H3.8v4.3h3.7V24H12v-6.2h3.6l.6-4.3H12v-3c0-1.2.3-2.4 2.2-2.4Z" /></svg>;
-  }
-  if (icon === "instagram") {
-    return <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7.3 2h9.4A5.3 5.3 0 0 1 22 7.3v9.4a5.3 5.3 0 0 1-5.3 5.3H7.3A5.3 5.3 0 0 1 2 16.7V7.3A5.3 5.3 0 0 1 7.3 2Zm0 2A3.3 3.3 0 0 0 4 7.3v9.4A3.3 3.3 0 0 0 7.3 20h9.4a3.3 3.3 0 0 0 3.3-3.3V7.3A3.3 3.3 0 0 0 16.7 4H7.3Zm4.7 3.2A4.8 4.8 0 1 1 7.2 12 4.8 4.8 0 0 1 12 7.2Zm0 2A2.8 2.8 0 1 0 14.8 12 2.8 2.8 0 0 0 12 9.2Zm5-2.5a1.1 1.1 0 1 1-1.1 1.1A1.1 1.1 0 0 1 17 6.7Z" /></svg>;
-  }
-  if (icon === "houzz") {
-    return <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 2.8v18.4l6.8-3.9v-6.4l5.4 3.1v6.4l3.8-2.2V7.1l-9.2-5.3v7L4 4.9Z" /></svg>;
-  }
+  if (icon === "facebook") return <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M14.2 8.1h2.4V4.3c-.4-.1-1.8-.2-3.4-.2-3.4 0-5.7 2.1-5.7 6v3.4H3.8v4.3h3.7V24H12v-6.2h3.6l.6-4.3H12v-3c0-1.2.3-2.4 2.2-2.4Z" /></svg>;
+  if (icon === "instagram") return <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M7.3 2h9.4A5.3 5.3 0 0 1 22 7.3v9.4a5.3 5.3 0 0 1-5.3 5.3H7.3A5.3 5.3 0 0 1 2 16.7V7.3A5.3 5.3 0 0 1 7.3 2Zm0 2A3.3 3.3 0 0 0 4 7.3v9.4A3.3 3.3 0 0 0 7.3 20h9.4a3.3 3.3 0 0 0 3.3-3.3V7.3A3.3 3.3 0 0 0 16.7 4H7.3Zm4.7 3.2A4.8 4.8 0 1 1 7.2 12 4.8 4.8 0 0 1 12 7.2Zm0 2A2.8 2.8 0 1 0 14.8 12 2.8 2.8 0 0 0 12 9.2Zm5-2.5a1.1 1.1 0 1 1-1.1 1.1A1.1 1.1 0 0 1 17 6.7Z" /></svg>;
+  if (icon === "houzz") return <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 2.8v18.4l6.8-3.9v-6.4l5.4 3.1v6.4l3.8-2.2V7.1l-9.2-5.3v7L4 4.9Z" /></svg>;
   return <svg aria-hidden="true" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.6 12.2c0-.8-.1-1.6-.2-2.3H12v4.4h6c-.3 1.4-1.1 2.6-2.3 3.4v2.8h3.7c2.1-2 3.2-4.8 3.2-8.3Z" /><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.6l-3.7-2.8c-1 .7-2.2 1-3.6 1-2.8 0-5.2-1.9-6.1-4.5H2.1V17A11 11 0 0 0 12 23Z" /><path fill="#FBBC05" d="M5.9 14.1a6.6 6.6 0 0 1 0-4.2V7H2.1a11 11 0 0 0 0 10l3.8-2.9Z" /><path fill="#EA4335" d="M12 5.4c1.6 0 3.1.6 4.3 1.7l3.2-3.2A10.8 10.8 0 0 0 12 1 11 11 0 0 0 2.1 7l3.8 2.9C6.8 7.3 9.2 5.4 12 5.4Z" /></svg>;
 }
 
@@ -54,19 +83,45 @@ function SocialLinks({ className = "" }: { className?: string }) {
   return <div className={`social-links ${className}`}>{socialLinks.map((link) => <a key={link.label} href={link.href} target="_blank" rel="noopener noreferrer" aria-label={link.label}><SocialIcon icon={link.icon} /></a>)}</div>;
 }
 
+function ProductFlyout() {
+  return <div className="dropdown products-flyout">
+    <div className="products-primary">
+      <div className="flyout-row"><Link href="/natural-stones/">Natural Stones</Link><span>›</span><div className="products-submenu">{productMenu.naturalStones.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}</div></div>
+      <div className="flyout-row"><Link href="/quartz/">Quartz</Link><span>›</span><div className="products-submenu">{productMenu.quartz.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}</div></div>
+      <div className="flyout-row"><Link href="/sinks/">Sinks</Link><span>›</span><div className="products-submenu">{productMenu.sinks.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}</div></div>
+      <div className="flyout-row"><Link href="/faucets/">Faucets</Link><span>›</span><div className="products-submenu">{productMenu.faucets.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}</div></div>
+      <div className="flyout-row"><Link href="/tile-selection/">Tile Selection</Link></div>
+    </div>
+  </div>;
+}
+
 function Header() {
   return <header className="site-header">
-    <div className="utility"><div className="shell utility-inner"><SocialLinks className="top-social" /><div><a href="mailto:granite@forevermarble.com">granite@forevermarble.com</a><a href="tel:+12152038666">(215) 203-8666</a><a className="book-small" href="https://square.site/book/6J5Y31VF9BB8M/forever-marble-granite-quartz-stone-philadelphia-pa">Book appointment →</a></div></div></div>
+    <div className="utility"><div className="shell utility-inner"><SocialLinks className="top-social" /><div><a href="mailto:granite@forevermarble.com">granite@forevermarble.com</a><a href="tel:+12152038666">Call us: (215) 203-8666</a><a className="book-small" href="https://square.site/book/6J5Y31VF9BB8M/forever-marble-granite-quartz-stone-philadelphia-pa">Book appointment →</a></div></div></div>
     <div className="shell nav-row">
       <Link href="/" aria-label="Forever Marble home"><Image src="/images/logo-white.png" alt="Forever Marble & Granite" width={245} height={70} priority /></Link>
       <nav aria-label="Primary navigation" className="desktop-nav">
-        <Link href="/about-us/">About</Link>
-        <div className="nav-group"><button type="button">Materials <span>⌄</span></button><div className="dropdown"><Link href="/granite/">Granite</Link><Link href="/marble/">Marble</Link><Link href="/quartz/">Quartz</Link><Link href="/quartzite/">Quartzite</Link><Link href="/natural-stones/">All natural stone</Link></div></div>
+        <Link href="/about-us/">About us</Link>
+        <div className="nav-group"><button type="button">Products <span>⌄</span></button><ProductFlyout /></div>
         <div className="nav-group"><button type="button">Information <span>⌄</span></button><div className="dropdown information-dropdown"><Link href="/where-do-i-begin/">Where Do I Begin?</Link><Link href="/going-green/">Going Green</Link><Link href="/maintenance-care/">Maintenance &amp; Care</Link><Link href="/edge-profiles/">Edge Profiles</Link><Link href="/getting-an-estimate/">Getting an Estimate</Link><Link href="/faqs/">F.A.Q</Link></div></div>
         <div className="nav-group"><button type="button">3D Tools <span>⌄</span></button><div className="dropdown tools-dropdown"><Link href="/kitchen-virturalizer/">Kitchen Visualizer</Link><Link href="/bathroom-virtualizer/">Bathroom Visualizer</Link><Link href="/3d-edges/">3D Edge Profiles</Link><Link href="/edge-profiles/">Edge Profile Guide</Link></div></div>
         <Link href="/gallery/">Gallery</Link><Link href="/specials/">Specials</Link><Link href="/contact-us/">Contact</Link>
       </nav>
-      <details className="mobile-menu"><summary aria-label="Open menu">Menu</summary><nav><Link href="/about-us/">About</Link><Link href="/granite/">Granite</Link><Link href="/marble/">Marble</Link><Link href="/quartz/">Quartz</Link><Link href="/quartzite/">Quartzite</Link><strong>Information</strong><Link href="/where-do-i-begin/">Where Do I Begin?</Link><Link href="/going-green/">Going Green</Link><Link href="/maintenance-care/">Maintenance &amp; Care</Link><Link href="/edge-profiles/">Edge Profiles</Link><Link href="/getting-an-estimate/">Getting an Estimate</Link><Link href="/faqs/">F.A.Q</Link><strong>3D Tools</strong><Link href="/kitchen-virturalizer/">Kitchen Visualizer</Link><Link href="/bathroom-virtualizer/">Bathroom Visualizer</Link><Link href="/3d-edges/">3D Edge Profiles</Link><Link href="/edge-profiles/">Edge Profile Guide</Link><Link href="/gallery/">Gallery</Link><Link href="/specials/">Specials</Link><Link href="/contact-us/">Contact</Link></nav></details>
+      <details className="mobile-menu"><summary aria-label="Open menu">Menu</summary><nav>
+        <Link href="/about-us/">About us</Link>
+        <strong>Products</strong>
+        <Link href="/natural-stones/">Natural Stones</Link>
+        {productMenu.naturalStones.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
+        <Link href="/quartz/">Quartz</Link>
+        {productMenu.quartz.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
+        <Link href="/sinks/">Sinks</Link>
+        {productMenu.sinks.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
+        <Link href="/faucets/">Faucets</Link>
+        {productMenu.faucets.map((item) => <Link key={item.href} href={item.href}>{item.label}</Link>)}
+        <Link href="/tile-selection/">Tile Selection</Link>
+        <strong>Information</strong><Link href="/where-do-i-begin/">Where Do I Begin?</Link><Link href="/going-green/">Going Green</Link><Link href="/maintenance-care/">Maintenance &amp; Care</Link><Link href="/edge-profiles/">Edge Profiles</Link><Link href="/getting-an-estimate/">Getting an Estimate</Link><Link href="/faqs/">F.A.Q</Link>
+        <strong>3D Tools</strong><Link href="/kitchen-virturalizer/">Kitchen Visualizer</Link><Link href="/bathroom-virtualizer/">Bathroom Visualizer</Link><Link href="/3d-edges/">3D Edge Profiles</Link><Link href="/edge-profiles/">Edge Profile Guide</Link><Link href="/gallery/">Gallery</Link><Link href="/specials/">Specials</Link><Link href="/contact-us/">Contact</Link>
+      </nav></details>
     </div>
   </header>;
 }
