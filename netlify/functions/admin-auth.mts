@@ -1,8 +1,10 @@
 import type { Handler } from "@netlify/functions";
+import { connectLambda } from "@netlify/blobs";
 import { authenticate, clearSessionCookie, createSession, json, requireSession, sessionCookie } from "./_lib/admin.js";
 
 export const handler: Handler = async (event) => {
   try {
+    connectLambda(event as never);
     if (event.httpMethod === "GET") {
       const session = requireSession(event.headers);
       return session ? json(200, { user: session }) : json(401, { error: "Not signed in" });
