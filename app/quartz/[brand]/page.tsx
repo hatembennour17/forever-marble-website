@@ -17,9 +17,13 @@ const brands: Record<string, string> = {
 };
 
 const brandInventoryUrls: Record<string, string> = {
-  cambria: "https://www.cambriausa.com/quartz-countertops/quartz-colors",
   caesarstone: "https://www.caesarstoneus.com/countertops/",
   "msi-quartz": "https://www.msisurfaces.com/quartz-countertops/quartz-collections/",
+};
+
+const brandCatalogUrls: Record<string, string> = {
+  cambria: "https://www.cambriausa.com/quartz-countertops/quartz-colors",
+  ...brandInventoryUrls,
 };
 
 export const dynamicParams = false;
@@ -35,6 +39,7 @@ export default async function QuartzBrandPage({ params }: { params: Promise<{ br
   const { brand } = await params;
   const name = brands[brand] || "Quartz";
   const inventoryUrl = brandInventoryUrls[brand];
+  const catalogUrl = brandCatalogUrls[brand];
   return <>
     <section className="legacy-hero product-legacy-hero">
       <Image src="/images/breadcrumb-default.jpg" alt={`${name} quartz`} fill priority sizes="100vw" />
@@ -54,6 +59,11 @@ export default async function QuartzBrandPage({ params }: { params: Promise<{ br
           loading="lazy"
           referrerPolicy="strict-origin-when-cross-origin"
         />
+      </div> : null}
+      {catalogUrl && !inventoryUrl ? <div className="shell legacy-info-card">
+        <h2>Browse {name} Quartz Colors</h2>
+        <p>{name} protects its catalog from being displayed inside other websites. Open the official catalog to explore available colors and designs.</p>
+        <a className="button gold" href={catalogUrl} target="_blank" rel="noopener noreferrer">View {name} Colors</a>
       </div> : null}
     </section>
     <LegacyProductTail />
