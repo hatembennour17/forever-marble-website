@@ -1,4 +1,4 @@
-import { getStore } from "@netlify/blobs";
+import { connectLambda, getStore } from "@netlify/blobs";
 import bcrypt from "bcryptjs";
 import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 
@@ -6,6 +6,7 @@ export type Role = "admin" | "staff";
 export type User = { id: string; email: string; passwordHash: string; role: Role; active: boolean; createdAt: string };
 export type Session = { sub: string; email: string; role: Role; exp: number };
 export const dataStore = () => getStore("forever-marble-admin");
+export const initBlobs = (event: unknown) => connectLambda(event as never);
 export const json = (statusCode: number, body: unknown, headers: Record<string, string> = {}) => ({ statusCode, headers: { "content-type": "application/json", "cache-control": "no-store", ...headers }, body: JSON.stringify(body) });
 
 function secret() {
