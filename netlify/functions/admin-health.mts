@@ -1,7 +1,9 @@
 import type { Handler } from "@netlify/functions";
+import { connectLambda } from "@netlify/blobs";
 import { dataStore, json } from "./_lib/admin.js";
 
-export const handler: Handler = async () => {
+export const handler: Handler = async (event) => {
+  connectLambda(event as never);
   let blobs = false;
   let blobError = "";
   try {
