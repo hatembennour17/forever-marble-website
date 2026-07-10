@@ -1,4 +1,5 @@
 import type { Handler } from "@netlify/functions";
+import { connectLambda } from "@netlify/blobs";
 import { randomUUID } from "node:crypto";
 import { cleanText, dataStore, json, requireSession } from "./_lib/admin.js";
 
@@ -7,6 +8,7 @@ const allowedStatuses = new Set<EstimateStatus>(["New", "Contacted", "Scheduled"
 
 export const handler: Handler = async (event) => {
   try {
+    connectLambda(event as never);
     const store = dataStore();
     if (event.httpMethod === "POST") {
       const body = JSON.parse(event.body || "{}");
