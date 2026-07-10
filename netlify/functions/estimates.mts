@@ -1,14 +1,13 @@
 import type { Handler } from "@netlify/functions";
-import { connectLambda } from "@netlify/blobs";
 import { randomUUID } from "node:crypto";
-import { cleanText, dataStore, json, requireSession } from "./_lib/admin.js";
+import { cleanText, dataStore, initBlobs, json, requireSession } from "./_lib/admin.js";
 
 type EstimateStatus = "New" | "Contacted" | "Scheduled" | "Won" | "Archived";
 const allowedStatuses = new Set<EstimateStatus>(["New", "Contacted", "Scheduled", "Won", "Archived"]);
 
 export const handler: Handler = async (event) => {
   try {
-    connectLambda(event as never);
+    initBlobs(event);
     const store = dataStore();
     if (event.httpMethod === "POST") {
       const body = JSON.parse(event.body || "{}");
