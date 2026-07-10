@@ -7,6 +7,18 @@ import LegacyProductTail from "../components/LegacyProductTail";
 
 const informationSlugs = new Set(["where-do-i-begin", "going-green", "maintenance-care", "edge-profiles", "getting-an-estimate", "faqs"]);
 const productSlugs = new Set(["granite", "marble", "quartz", "quartzite", "natural-stones"]);
+const quartzBenefits = [
+  { title: "Durability", text: "Quartz resists scratches and stains, making it dependable for busy kitchens, bathrooms and work areas." },
+  { title: "Low Maintenance", text: "Engineered quartz does not require routine sealing and cleans easily with mild soap and water." },
+  { title: "Non-Porous Surface", text: "Its non-porous construction helps prevent liquid absorption and supports a cleaner everyday surface." },
+  { title: "Colors & Patterns", text: "Choose from quiet solid colors, subtle movement and dramatic marble-inspired veining." },
+];
+const quartzApplications = ["Kitchen Countertops", "Bathroom Vanities", "Backsplashes", "Shower Walls"];
+const quartzBrands = [
+  ["Cambria", "cambria"], ["Caesarstone", "caesarstone"], ["Sliestone", "sliestone"], ["MSI Quartz", "msi-quartz"],
+  ["Emerstone", "emerstone"], ["PentalQuartz", "pentalquartz"], ["One Quartz Surfaces", "one-quartz-surfaces"],
+  ["Spectrum Quartz", "spectrum-quartz"], ["Wilsonart", "wilsonart"], ["Zodiac", "zodiac"],
+];
 
 const informationImages: Record<string, { src: string; alt: string }[]> = {
   "where-do-i-begin": [
@@ -88,6 +100,18 @@ function ProductPage({ slug, page }: { slug: string; page: (typeof pages)[string
         <iframe className="legacy-inventory-embed" src={inventoryEmbed} title={`${title} slabs inventory`} loading="lazy" referrerPolicy="strict-origin-when-cross-origin" />
       </div> : null}
     </section>
+    {slug === "quartz" ? <section className="quartz-guide">
+      <div className="shell">
+        <header className="quartz-guide-intro"><p className="legacy-product-eyebrow">Quartz Countertops</p><h2>Discover the Modern Elegance of Quartz</h2><p>Quartz is an engineered surface made from natural quartz combined with resin and pigments. It delivers consistent color, dependable performance and design flexibility for contemporary and traditional spaces.</p></header>
+        <div className="quartz-benefit-grid">{quartzBenefits.map((benefit) => <article key={benefit.title}><h3>{benefit.title}</h3><p>{benefit.text}</p></article>)}</div>
+        <div className="quartz-guide-split">
+          <div><p className="legacy-product-eyebrow">Applications</p><h2>Made for the way you live</h2><p>Quartz provides a durable, cohesive finish across the most-used surfaces in your home.</p><ul>{quartzApplications.map((application) => <li key={application}>{application}</li>)}</ul></div>
+          <div><p className="legacy-product-eyebrow">Maintenance</p><h2>Simple everyday care</h2><p>Clean quartz with a soft cloth and mild soap. Avoid abrasive cleaners, protect it from harsh chemicals, and use trivets or hot pads around extreme heat.</p><Link className="button gold" href="/maintenance-care/">View Care Guidance</Link></div>
+        </div>
+        <div className="quartz-brands-section"><div className="quartz-brands-heading"><div><p className="legacy-product-eyebrow">Our Quartz Brands</p><h2>Explore colors from trusted manufacturers</h2></div><p>Compare designs and collections, then visit our showroom for help selecting the right surface.</p></div><div className="quartz-brand-grid">{quartzBrands.map(([name, route]) => <Link key={route} href={`/quartz/${route}/`}><span>Quartz Collection</span><strong>{name}</strong><b>Explore →</b></Link>)}</div></div>
+        <div className="quartz-closing"><h2>Why choose Forever Marble for quartz?</h2><p>Our team helps you compare brands, select colors, plan edges and layouts, and move from measurements to professional fabrication and installation.</p><div className="actions"><Link className="button gold" href="/contact-us/">Request an Estimate</Link><a className="button outline" href="tel:+12152038666">Call (215) 203-8666</a></div></div>
+      </div>
+    </section> : null}
     <LegacyProductTail />
   </>;
 }
