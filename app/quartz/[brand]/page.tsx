@@ -16,6 +16,12 @@ const brands: Record<string, string> = {
   zodiac: "Zodiac",
 };
 
+const brandInventoryUrls: Record<string, string> = {
+  cambria: "https://www.cambriausa.com/quartz-countertops/quartz-colors",
+  caesarstone: "https://www.caesarstoneus.com/countertops/",
+  "msi-quartz": "https://www.msisurfaces.com/quartz-countertops/quartz-collections/",
+};
+
 export const dynamicParams = false;
 export function generateStaticParams() { return Object.keys(brands).map((brand) => ({ brand })); }
 
@@ -28,6 +34,7 @@ export async function generateMetadata({ params }: { params: Promise<{ brand: st
 export default async function QuartzBrandPage({ params }: { params: Promise<{ brand: string }> }) {
   const { brand } = await params;
   const name = brands[brand] || "Quartz";
+  const inventoryUrl = brandInventoryUrls[brand];
   return <>
     <section className="legacy-hero product-legacy-hero">
       <Image src="/images/breadcrumb-default.jpg" alt={`${name} quartz`} fill priority sizes="100vw" />
@@ -39,6 +46,15 @@ export default async function QuartzBrandPage({ params }: { params: Promise<{ br
         <figure className="legacy-product-image"><Image src="/images/quartz-countertops.png" alt={`${name} quartz`} fill sizes="(max-width: 900px) 100vw, 55vw" /></figure>
         <article className="legacy-product-copy"><p className="legacy-product-eyebrow">Product</p><h2>{name}</h2><p>Explore {name} quartz surfaces for kitchens, bathrooms, vanities and custom countertop projects.</p><p>Forever Marble helps clients compare quartz brands, colors, slab availability, edge profiles and installation details. Visit the showroom or request an estimate to match the right material to your project.</p><div className="actions"><Link className="button gold" href="/contact-us/">Request an estimate</Link><Link className="button outline" href="/quartz/">Back to Quartz</Link></div></article>
       </div>
+      {inventoryUrl ? <div className="legacy-inventory-embed-wrap">
+        <iframe
+          className="legacy-inventory-embed"
+          src={inventoryUrl}
+          title={`${name} quartz colors and inventory`}
+          loading="lazy"
+          referrerPolicy="strict-origin-when-cross-origin"
+        />
+      </div> : null}
     </section>
     <LegacyProductTail />
   </>;
