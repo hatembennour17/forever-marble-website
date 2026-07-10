@@ -112,7 +112,7 @@ function ProductPage({ slug, page }: { slug: string; page: (typeof pages)[string
         <div className="quartz-closing"><h2>Why choose Forever Marble for quartz?</h2><p>Our team helps you compare brands, select colors, plan edges and layouts, and move from measurements to professional fabrication and installation.</p><div className="actions"><Link className="button gold" href="/contact-us/">Request an Estimate</Link><a className="button outline" href="tel:+12152038666">Call (215) 203-8666</a></div></div>
       </div>
     </section> : null}
-    <LegacyProductTail />
+    <LegacyProductTail showFaqs={slug === "granite"} />
   </>;
 }
 
