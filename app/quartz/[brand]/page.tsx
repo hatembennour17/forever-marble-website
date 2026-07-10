@@ -18,11 +18,18 @@ const brands: Record<string, string> = {
 
 const brandInventoryUrls: Record<string, string> = {
   caesarstone: "https://www.caesarstoneus.com/countertops/",
+  sliestone: "https://www.cosentino.com/usa/colors/",
   "msi-quartz": "https://www.msisurfaces.com/quartz-countertops/quartz-collections/",
+  emerstone: "https://emerstone.com/product-category/all/",
+  "one-quartz-surfaces": "https://www.daltile.com/countertops-product-category/one-quartz",
+  "spectrum-quartz": "https://spectrumquartz.com/",
+  zodiac: "https://www.na.corian.com/",
 };
 
 const brandCatalogUrls: Record<string, string> = {
   cambria: "https://www.cambriausa.com/quartz-countertops/quartz-colors",
+  pentalquartz: "https://arcsurfaces.com/quartz/pentalquartz/",
+  wilsonart: "https://www.wilsonart.com/advance-search?category_option%5B%5D=22",
   ...brandInventoryUrls,
 };
 
@@ -73,10 +80,10 @@ export default async function QuartzBrandPage({ params }: { params: Promise<{ br
       </div> : null}
       {catalogUrl && !inventoryUrl ? <div className="shell legacy-info-card">
         <h2>Browse {name} Quartz Colors</h2>
-        <p>{name} protects its catalog from being displayed inside other websites. Open the official catalog to explore available colors and designs.</p>
+        <p>Open the official {name} supplier catalog to explore available colors and designs.</p>
         <a className="button gold" href={catalogUrl} target="_blank" rel="noopener noreferrer">View {name} Colors</a>
       </div> : null}
     </section>
-    <LegacyProductTail />
+    <LegacyProductTail showFaqs={false} />
   </>;
 }
