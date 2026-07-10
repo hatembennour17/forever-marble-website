@@ -3,12 +3,12 @@ import Image from "next/image";
 import Link from "next/link";
 import LegacyProductTail from "../../components/LegacyProductTail";
 
-const stones: Record<string, { name: string; image: string; intro: string }> = {
-  precioustone: { name: "Precioustone", image: "/images/natural-stone.jpg", intro: "Distinctive natural stone surfaces selected for statement kitchens, baths, fireplaces and feature details." },
-  travertine: { name: "Travertine", image: "/images/natural-stone.jpg", intro: "Warm, textured natural stone with timeless character for indoor and outdoor design projects." },
-  onyx: { name: "Onyx", image: "/images/natural-stone.jpg", intro: "Dramatic translucent stone with rich movement for decorative counters, walls and custom accents." },
-  slate: { name: "Slate", image: "/images/information/slate-counters.jpg", intro: "A refined natural stone option known for earthy color, texture and durable everyday performance." },
-  soapstone: { name: "Soapstone", image: "/images/soapstone.webp", intro: "A smooth, low-sheen natural stone with classic depth and a comfortable lived-in feel." },
+const stones: Record<string, { name: string; image: string; intro: string; inventoryUrl: string }> = {
+  precioustone: { name: "Precioustone", image: "/images/natural-stone.jpg", intro: "Distinctive natural stone surfaces selected for statement kitchens, baths, fireplaces and feature details.", inventoryUrl: "https://umistone.com/live-inventory/jamesburg/?matGroup=SP" },
+  travertine: { name: "Travertine", image: "/images/natural-stone.jpg", intro: "Warm, textured natural stone with timeless character for indoor and outdoor design projects.", inventoryUrl: "https://umistone.com/live-inventory/jamesburg/?matGroup=ST" },
+  onyx: { name: "Onyx", image: "/images/natural-stone.jpg", intro: "Dramatic translucent stone with rich movement for decorative counters, walls and custom accents.", inventoryUrl: "https://umistone.com/live-inventory/jamesburg/?matGroup=SO" },
+  slate: { name: "Slate", image: "/images/information/slate-counters.jpg", intro: "A refined natural stone option known for earthy color, texture and durable everyday performance.", inventoryUrl: "https://umistone.com/live-inventory/jamesburg/?matGroup=SG" },
+  soapstone: { name: "Soapstone", image: "/images/soapstone.webp", intro: "A smooth, low-sheen natural stone with classic depth and a comfortable lived-in feel.", inventoryUrl: "https://umistone.com/live-inventory/jamesburg/?matGroup=SG" },
 };
 
 export const dynamicParams = false;
@@ -33,6 +33,15 @@ export default async function NaturalStonePage({ params }: { params: Promise<{ s
       <div className="shell legacy-product-grid">
         <figure className="legacy-product-image"><Image src={item.image} alt={item.name} fill sizes="(max-width: 900px) 100vw, 55vw" /></figure>
         <article className="legacy-product-copy"><p className="legacy-product-eyebrow">Product</p><h2>{item.name}</h2><p>{item.intro}</p><p>Forever Marble helps you compare natural stone materials, finishes, edge profiles and installation details. Visit the showroom to review samples and plan the right surface for your project.</p><div className="actions"><Link className="button gold" href="/contact-us/">Request an estimate</Link><Link className="button outline" href="/natural-stones/">Back to Natural Stones</Link></div></article>
+      </div>
+      <div className="legacy-inventory-embed-wrap">
+        <iframe
+          className="legacy-inventory-embed"
+          src={item.inventoryUrl}
+          title={`${item.name} slabs inventory`}
+          loading="lazy"
+          referrerPolicy="strict-origin-when-cross-origin"
+        />
       </div>
     </section>
     <LegacyProductTail />
