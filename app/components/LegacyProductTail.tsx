@@ -8,9 +8,9 @@ const productFaqs = [
   { question: "Are there customizable options for granite countertops?", answer: "Absolutely! We offer a wide array of finishes and edges, allowing you to customize your countertop to meet your specific design preferences and functional needs." },
 ];
 
-export default function LegacyProductTail() {
+export default function LegacyProductTail({ showFaqs = true }: { showFaqs?: boolean }) {
   return <>
-    <section className="legacy-faq-section">
+    {showFaqs ? <section className="legacy-faq-section">
       <div className="legacy-faq-shell">
         <h2>FAQs</h2>
         <div className="legacy-faq-list">{productFaqs.map((item, index) => (
@@ -20,7 +20,7 @@ export default function LegacyProductTail() {
           </details>
         ))}</div>
       </div>
-    </section>
+    </section> : null}
     <section className="legacy-dream-cta">
       <div className="shell">
         <h2>You dream It, we Make It</h2>
