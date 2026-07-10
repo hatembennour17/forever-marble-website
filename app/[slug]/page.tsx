@@ -53,7 +53,12 @@ function labelFromSlug(slug: string) {
 function ProductPage({ slug, page }: { slug: string; page: (typeof pages)[string] }) {
   const title = slug === "natural-stones" ? "Natural Stones" : labelFromSlug(slug);
   const productImage = slug === "granite" ? "/images/product-granite-main.jpg" : page.image;
-  const inventoryEmbed = slug === "granite" ? "https://www.ohmintl.com/countertops/granite/" : null;
+  const inventoryEmbeds: Record<string, string> = {
+    granite: "https://www.ohmintl.com/countertops/granite/",
+    marble: "https://www.ohmintl.com/countertops/marble/",
+    quartzite: "https://www.ohmintl.com/countertops/quartzite/",
+  };
+  const inventoryEmbed = inventoryEmbeds[slug] ?? null;
   return <>
     <section className="legacy-hero product-legacy-hero">
       <Image src="/images/breadcrumb-default.jpg" alt={`${title} from Forever Marble`} fill priority sizes="100vw" />
@@ -80,7 +85,7 @@ function ProductPage({ slug, page }: { slug: string; page: (typeof pages)[string
         </article>
       </div>
       {inventoryEmbed ? <div className="legacy-inventory-embed-wrap">
-        <iframe className="legacy-inventory-embed" src={inventoryEmbed} title={`${title} slabs inventory`} />
+        <iframe className="legacy-inventory-embed" src={inventoryEmbed} title={`${title} slabs inventory`} loading="lazy" referrerPolicy="strict-origin-when-cross-origin" />
       </div> : null}
     </section>
     <LegacyProductTail />
