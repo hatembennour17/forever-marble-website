@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import LegacyProductTail from "../../components/LegacyProductTail";
 
 const stones: Record<string, { name: string; image: string; intro: string }> = {
   precioustone: { name: "Precioustone", image: "/images/natural-stone.jpg", intro: "Distinctive natural stone surfaces selected for statement kitchens, baths, fireplaces and feature details." },
@@ -34,5 +35,6 @@ export default async function NaturalStonePage({ params }: { params: Promise<{ s
         <article className="legacy-product-copy"><p className="legacy-product-eyebrow">Product</p><h2>{item.name}</h2><p>{item.intro}</p><p>Forever Marble helps you compare natural stone materials, finishes, edge profiles and installation details. Visit the showroom to review samples and plan the right surface for your project.</p><div className="actions"><Link className="button gold" href="/contact-us/">Request an estimate</Link><Link className="button outline" href="/natural-stones/">Back to Natural Stones</Link></div></article>
       </div>
     </section>
+    <LegacyProductTail />
   </>;
 }

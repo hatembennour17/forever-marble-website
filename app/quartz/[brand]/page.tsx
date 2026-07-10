@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import LegacyProductTail from "../../components/LegacyProductTail";
 
 const brands: Record<string, string> = {
   cambria: "Cambria",
@@ -39,5 +40,6 @@ export default async function QuartzBrandPage({ params }: { params: Promise<{ br
         <article className="legacy-product-copy"><p className="legacy-product-eyebrow">Product</p><h2>{name}</h2><p>Explore {name} quartz surfaces for kitchens, bathrooms, vanities and custom countertop projects.</p><p>Forever Marble helps clients compare quartz brands, colors, slab availability, edge profiles and installation details. Visit the showroom or request an estimate to match the right material to your project.</p><div className="actions"><Link className="button gold" href="/contact-us/">Request an estimate</Link><Link className="button outline" href="/quartz/">Back to Quartz</Link></div></article>
       </div>
     </section>
+    <LegacyProductTail />
   </>;
 }

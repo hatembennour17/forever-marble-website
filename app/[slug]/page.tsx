@@ -3,17 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { pages } from "../content";
+import LegacyProductTail from "../components/LegacyProductTail";
 
 const informationSlugs = new Set(["where-do-i-begin", "going-green", "maintenance-care", "edge-profiles", "getting-an-estimate", "faqs"]);
 const productSlugs = new Set(["granite", "marble", "quartz", "quartzite", "natural-stones"]);
-
-const productFaqs = [
-  { question: "Why is this a good material for countertops?", answer: "It offers a strong combination of beauty, durability and long-term value for kitchens, bathrooms and custom surfaces." },
-  { question: "How do I maintain my countertop?", answer: "Daily cleaning with mild soap and water is usually enough. Our team will explain material-specific care before installation." },
-  { question: "Can I customize the edge and finish?", answer: "Yes. Forever Marble can help you compare edge profiles, finishes, sink cutouts and layout details before fabrication." },
-  { question: "How long does installation take?", answer: "Many installations are completed in a day after template and fabrication, depending on project size and complexity." },
-  { question: "Can I see the material before buying?", answer: "Yes. Visit the showroom to compare colors, movement, samples and project options in person." },
-];
 
 const informationImages: Record<string, { src: string; alt: string }[]> = {
   "where-do-i-begin": [
@@ -59,6 +52,8 @@ function labelFromSlug(slug: string) {
 
 function ProductPage({ slug, page }: { slug: string; page: (typeof pages)[string] }) {
   const title = slug === "natural-stones" ? "Natural Stones" : labelFromSlug(slug);
+  const productImage = slug === "granite" ? "/images/product-granite-main.jpg" : page.image;
+  const inventoryEmbed = slug === "granite" ? "https://www.ohmintl.com/countertops/granite/" : null;
   return <>
     <section className="legacy-hero product-legacy-hero">
       <Image src="/images/breadcrumb-default.jpg" alt={`${title} from Forever Marble`} fill priority sizes="100vw" />
@@ -71,7 +66,7 @@ function ProductPage({ slug, page }: { slug: string; page: (typeof pages)[string
     <section className="legacy-product-section">
       <div className="shell legacy-product-grid">
         <figure className="legacy-product-image">
-          <Image src={page.image} alt={page.title} fill sizes="(max-width: 900px) 100vw, 55vw" />
+          <Image src={productImage} alt={page.title} fill sizes="(max-width: 900px) 100vw, 55vw" />
         </figure>
         <article className="legacy-product-copy">
           <p className="legacy-product-eyebrow">Product</p>
@@ -84,24 +79,11 @@ function ProductPage({ slug, page }: { slug: string; page: (typeof pages)[string
           </div>
         </article>
       </div>
+      {inventoryEmbed ? <div className="legacy-inventory-embed-wrap">
+        <iframe className="legacy-inventory-embed" src={inventoryEmbed} title={`${title} slabs inventory`} />
+      </div> : null}
     </section>
-    <section className="legacy-faq-section">
-      <div className="shell">
-        <h2>FAQs</h2>
-        <div className="legacy-faq-list">{productFaqs.map((item, index) => (
-          <details key={item.question} open>
-            <summary>{index + 1}. {item.question}</summary>
-            <p>{item.answer}</p>
-          </details>
-        ))}</div>
-      </div>
-    </section>
-    <section className="legacy-dream-cta">
-      <div className="shell">
-        <h2>You dream It, we Make It</h2>
-        <a className="button gold" href="https://square.site/book/6J5Y31VF9BB8M/forever-marble-granite-quartz-stone-philadelphia-pa">Book An Appointment</a>
-      </div>
-    </section>
+    <LegacyProductTail />
   </>;
 }
 
