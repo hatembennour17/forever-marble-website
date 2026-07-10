@@ -26,6 +26,16 @@ const brandCatalogUrls: Record<string, string> = {
   ...brandInventoryUrls,
 };
 
+const brandDescriptions: Record<string, { intro: string; details: string }> = {
+  sliestone: { intro: "Explore versatile quartz designs for kitchens, bathrooms, vanities and custom countertop projects.", details: "Compare colors, movement and finishes with our team to find a durable, low-maintenance surface that complements your space." },
+  emerstone: { intro: "Discover Emerstone quartz surfaces designed to balance modern style with practical everyday performance.", details: "Forever Marble can help you review color options, coordinate cabinetry and flooring, and plan fabrication details for a polished installation." },
+  pentalquartz: { intro: "Explore PentalQuartz colors ranging from subtle neutrals to expressive stone-inspired patterns.", details: "Our specialists help you compare samples, understand availability and select the right edge and layout for your kitchen or bathroom." },
+  "one-quartz-surfaces": { intro: "One Quartz Surfaces offers refined designs for residential and commercial interiors.", details: "Choose from versatile colors and patterns, then work with Forever Marble on measurements, fabrication and installation details." },
+  "spectrum-quartz": { intro: "Spectrum Quartz brings together contemporary colors, natural-looking movement and easy-care performance.", details: "Visit our showroom to compare selections and plan a quartz surface suited to your style, space and daily routine." },
+  wilsonart: { intro: "Explore Wilsonart quartz designs created for stylish, durable kitchens, bathrooms and workspaces.", details: "Our team can help coordinate samples, color direction, edge profiles and project measurements before fabrication." },
+  zodiac: { intro: "Discover Zodiac quartz surfaces in versatile colors and patterns for custom countertops and vanities.", details: "Forever Marble guides you through material selection, layout planning, fabrication and professional installation." },
+};
+
 export const dynamicParams = false;
 export function generateStaticParams() { return Object.keys(brands).map((brand) => ({ brand })); }
 
@@ -40,6 +50,7 @@ export default async function QuartzBrandPage({ params }: { params: Promise<{ br
   const name = brands[brand] || "Quartz";
   const inventoryUrl = brandInventoryUrls[brand];
   const catalogUrl = brandCatalogUrls[brand];
+  const copy = brandDescriptions[brand] ?? { intro: `Explore ${name} quartz surfaces for kitchens, bathrooms, vanities and custom countertop projects.`, details: "Forever Marble helps clients compare quartz brands, colors, slab availability, edge profiles and installation details." };
   return <>
     <section className="legacy-hero product-legacy-hero">
       <Image src="/images/breadcrumb-default.jpg" alt={`${name} quartz`} fill priority sizes="100vw" />
@@ -49,7 +60,7 @@ export default async function QuartzBrandPage({ params }: { params: Promise<{ br
     <section className="legacy-product-section">
       <div className="shell legacy-product-grid">
         <figure className="legacy-product-image"><Image src="/images/quartz-countertops.png" alt={`${name} quartz`} fill sizes="(max-width: 900px) 100vw, 55vw" /></figure>
-        <article className="legacy-product-copy"><p className="legacy-product-eyebrow">Product</p><h2>{name}</h2><p>Explore {name} quartz surfaces for kitchens, bathrooms, vanities and custom countertop projects.</p><p>Forever Marble helps clients compare quartz brands, colors, slab availability, edge profiles and installation details. Visit the showroom or request an estimate to match the right material to your project.</p><div className="actions"><Link className="button gold" href="/contact-us/">Request an estimate</Link><Link className="button outline" href="/quartz/">Back to Quartz</Link></div></article>
+        <article className="legacy-product-copy"><p className="legacy-product-eyebrow">Product</p><h2>{name}</h2><p>{copy.intro}</p><p>{copy.details}</p><div className="actions"><Link className="button gold" href="/contact-us/">Request an estimate</Link><Link className="button outline" href="/quartz/">Back to Quartz</Link></div></article>
       </div>
       {inventoryUrl ? <div className="legacy-inventory-embed-wrap">
         <iframe
