@@ -1,4 +1,5 @@
 import type { Handler } from "@netlify/functions";
+import { connectLambda } from "@netlify/blobs";
 import bcrypt from "bcryptjs";
 import { randomUUID } from "node:crypto";
 import { cleanText, dataStore, json, listUsers, requireSession, saveUser, type Role, type User } from "./_lib/admin.js";
@@ -7,6 +8,7 @@ const publicUser = (user: User) => ({ id: user.id, email: user.email, role: user
 
 export const handler: Handler = async (event) => {
   try {
+    connectLambda(event as never);
     const session = requireSession(event.headers);
     if (!session || session.role !== "admin") return json(403, { error: "Administrator access required" });
     if (event.httpMethod === "GET") return json(200, { users: (await listUsers()).map(publicUser) });
