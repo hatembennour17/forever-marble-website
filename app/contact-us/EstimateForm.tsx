@@ -13,6 +13,7 @@ export default function EstimateForm() {
     try {
       const response = await fetch("/.netlify/functions/estimates", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(estimate) });
       if (!response.ok) throw new Error("Submission failed");
+      window.gtag?.("event", "conversion", { send_to: "AW-1034233006/-iDbCJHYzoEdEK7JlO0D", value: 1, currency: "USD" });
       element.reset(); setState("sent"); router.push("/thank-you/");
     } catch { setState("error"); }
   }
