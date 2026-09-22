@@ -1,8 +1,10 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function EstimateForm() {
+  const router = useRouter();
   const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault(); setState("sending");
@@ -11,7 +13,7 @@ export default function EstimateForm() {
     try {
       const response = await fetch("/.netlify/functions/estimates", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(estimate) });
       if (!response.ok) throw new Error("Submission failed");
-      element.reset(); setState("sent");
+      element.reset(); setState("sent"); router.push("/thank-you/");
     } catch { setState("error"); }
   }
 

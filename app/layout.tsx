@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Script from "next/script";
 import "./globals.css";
+import GoogleAdsTracking from "./components/GoogleAdsTracking";
 
 const siteUrl = "https://forevermarble.net";
 const whatsappUrl = "https://wa.me/12152038666?text=Hi%20Forever%20Marble%2C%20I%27d%20like%20help%20with%20a%20countertop%20project.";
@@ -131,5 +133,5 @@ function Footer() {
 }
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} /><Header/><main>{children}</main><Footer/><a className="floating-whatsapp" href={whatsappUrl} target="_blank" rel="noopener noreferrer" aria-label="Chat with Forever Marble on WhatsApp"><svg aria-hidden="true" viewBox="0 0 32 32"><path d="M16.02 3.2A12.72 12.72 0 0 0 5.14 22.5L3.8 28.8l6.42-1.48A12.72 12.72 0 1 0 16.02 3.2Zm0 22.95c-2.05 0-3.95-.6-5.55-1.65l-.4-.26-3.27.75.7-3.18-.27-.42a10.22 10.22 0 1 1 8.8 4.76Zm5.62-7.65c-.3-.16-1.8-.9-2.08-1-.28-.1-.48-.16-.68.16-.2.3-.78 1-.96 1.18-.18.2-.36.22-.66.06-.3-.16-1.28-.47-2.43-1.5-.9-.8-1.5-1.78-1.68-2.08-.18-.31-.02-.48.14-.64.14-.14.3-.36.46-.54.16-.18.2-.3.3-.5.1-.2.05-.38-.02-.54-.08-.16-.68-1.64-.94-2.25-.25-.6-.5-.5-.68-.52h-.58c-.2 0-.54.08-.82.38-.28.3-1.08 1.06-1.08 2.58s1.1 2.98 1.26 3.18c.16.2 2.18 3.32 5.27 4.65.74.32 1.31.5 1.76.65.74.23 1.4.2 1.94.12.6-.09 1.8-.74 2.06-1.45.26-.72.26-1.34.18-1.46-.08-.13-.28-.2-.58-.36Z"/></svg><span>WhatsApp</span></a><a className="floating-call" href="tel:+12152038666" aria-label="Call Forever Marble">Call (215) 203-8666</a></body></html>;
+  return <html lang="en"><body><Script src="https://www.googletagmanager.com/gtag/js?id=AW-1034233006" strategy="afterInteractive"/><Script id="google-ads-tag" strategy="afterInteractive">{`window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'AW-1034233006'); gtag('config', 'AW-1034233006/igMnCLT_i_0DEK7JlO0D', { phone_conversion_number: '2152038666' });`}</Script><GoogleAdsTracking/><script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} /><Header/><main>{children}</main><Footer/><a className="floating-whatsapp" href={whatsappUrl} target="_blank" rel="noopener noreferrer" aria-label="Chat with Forever Marble on WhatsApp"><svg aria-hidden="true" viewBox="0 0 32 32"><path d="M16.02 3.2A12.72 12.72 0 0 0 5.14 22.5L3.8 28.8l6.42-1.48A12.72 12.72 0 1 0 16.02 3.2Zm0 22.95c-2.05 0-3.95-.6-5.55-1.65l-.4-.26-3.27.75.7-3.18-.27-.42a10.22 10.22 0 1 1 8.8 4.76Zm5.62-7.65c-.3-.16-1.8-.9-2.08-1-.28-.1-.48-.16-.68.16-.2.3-.78 1-.96 1.18-.18.2-.36.22-.66.06-.3-.16-1.28-.47-2.43-1.5-.9-.8-1.5-1.78-1.68-2.08-.18-.31-.02-.48.14-.64.14-.14.3-.36.46-.54.16-.18.2-.3.3-.5.1-.2.05-.38-.02-.54-.08-.16-.68-1.64-.94-2.25-.25-.6-.5-.5-.68-.52h-.58c-.2 0-.54.08-.82.38-.28.3-1.08 1.06-1.08 2.58s1.1 2.98 1.26 3.18c.16.2 2.18 3.32 5.27 4.65.74.32 1.31.5 1.76.65.74.23 1.4.2 1.94.12.6-.09 1.8-.74 2.06-1.45.26-.72.26-1.34.18-1.46-.08-.13-.28-.2-.58-.36Z"/></svg><span>WhatsApp</span></a><a className="floating-call" href="tel:+12152038666" aria-label="Call Forever Marble">Call (215) 203-8666</a></body></html>;
 }
