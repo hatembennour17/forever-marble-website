@@ -6,6 +6,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const siteUrl = "https://forevermarble.net";
   const toolPages = ["kitchen-virturalizer", "bathroom-virtualizer", "3d-edges"];
   const standalonePages = ["gallery", "specials", "sinks", "faucets", "tile-selection"];
+  const serviceAreas = ["philadelphia", "bucks-county", "montgomery-county", "delaware-county", "chester-county", "camden-county", "burlington-county"];
   const productPages = [
     "natural-stones/precioustone",
     "natural-stones/travertine",
@@ -44,6 +45,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
     ...standalonePages.map((slug) => ({
       url: `${siteUrl}/${slug}/`,
+      lastModified: now,
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    })),
+    ...serviceAreas.map((area) => ({
+      url: `${siteUrl}/service-areas/${area}/`,
       lastModified: now,
       changeFrequency: "monthly" as const,
       priority: 0.8,

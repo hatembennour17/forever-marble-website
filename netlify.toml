@@ -10,6 +10,75 @@
   directory = "netlify/functions"
   node_bundler = "esbuild"
 
+# Preserve high-value legacy URLs with relevant one-hop permanent redirects.
+[[redirects]]
+  from = "/about-us/more-about-us/*"
+  to = "https://forevermarble.net/about-us/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/shop/*"
+  to = "https://forevermarble.net/natural-stones/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/philadelphia-county-pa/*"
+  to = "https://forevermarble.net/service-areas/philadelphia/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/bucks-county-pa/*"
+  to = "https://forevermarble.net/service-areas/bucks-county/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/montgomery-county-pa/*"
+  to = "https://forevermarble.net/service-areas/montgomery-county/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/delaware-county-pa/*"
+  to = "https://forevermarble.net/service-areas/delaware-county/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/chester-county-pa/*"
+  to = "https://forevermarble.net/service-areas/chester-county/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/camdens-county-nj/*"
+  to = "https://forevermarble.net/service-areas/camden-county/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/camden-county-nj/*"
+  to = "https://forevermarble.net/service-areas/camden-county/"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/burlington-county-nj/*"
+  to = "https://forevermarble.net/service-areas/burlington-county/"
+  status = 301
+  force = true
+
+# The old .com host must preserve every remaining path and query string.
+[[redirects]]
+  from = "/*"
+  to = "https://forevermarble.net/:splat"
+  status = 301
+  force = true
+  conditions = { Host = ["forevermarble.com", "www.forevermarble.com"] }
+
 [[headers]]
   for = "/admin/*"
   [headers.values]

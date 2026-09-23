@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { pages } from "../content";
 import LegacyProductTail from "../components/LegacyProductTail";
 
-const informationSlugs = new Set(["where-do-i-begin", "going-green", "maintenance-care", "edge-profiles", "getting-an-estimate", "faqs"]);
+const informationSlugs = new Set(["where-do-i-begin", "going-green", "maintenance-care", "edge-profiles", "getting-an-estimate", "faqs", "pricing-packages", "after-sale-service"]);
 const productSlugs = new Set(["granite", "marble", "quartz", "quartzite", "natural-stones"]);
 const quartzBenefits = [
   { title: "Durability", text: "Quartz resists scratches and stains, making it dependable for busy kitchens, bathrooms and work areas." },
