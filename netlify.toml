@@ -72,12 +72,30 @@
   force = true
 
 # The old .com host must preserve every remaining path and query string.
+# Netlify domain redirects match the full request URL, including the alias host.
 [[redirects]]
-  from = "/*"
+  from = "https://forevermarble.com/*"
   to = "https://forevermarble.net/:splat"
   status = 301
   force = true
-  conditions = { Host = ["forevermarble.com", "www.forevermarble.com"] }
+
+[[redirects]]
+  from = "http://forevermarble.com/*"
+  to = "https://forevermarble.net/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "https://www.forevermarble.com/*"
+  to = "https://forevermarble.net/:splat"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "http://www.forevermarble.com/*"
+  to = "https://forevermarble.net/:splat"
+  status = 301
+  force = true
 
 [[headers]]
   for = "/admin/*"
