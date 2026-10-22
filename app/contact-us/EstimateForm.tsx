@@ -3,6 +3,34 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 
+const estimateConversion = "AW-1034233006/-iDbCJHYzoEdEK7JlO0D";
+
+function trackEstimateConversion() {
+  return new Promise<void>((resolve) => {
+    if (!window.gtag) {
+      resolve();
+      return;
+    }
+
+    let completed = false;
+    const finish = () => {
+      if (completed) return;
+      completed = true;
+      resolve();
+    };
+
+    window.gtag("event", "conversion", {
+      send_to: estimateConversion,
+      value: 1,
+      currency: "USD",
+      event_callback: finish,
+      event_timeout: 2000,
+    });
+
+    window.setTimeout(finish, 2200);
+  });
+}
+
 export default function EstimateForm() {
   const router = useRouter();
   const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
@@ -13,8 +41,10 @@ export default function EstimateForm() {
     try {
       const response = await fetch("/.netlify/functions/estimates", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(estimate) });
       if (!response.ok) throw new Error("Submission failed");
-      window.gtag?.("event", "conversion", { send_to: "AW-1034233006/-iDbCJHYzoEdEK7JlO0D", value: 1, currency: "USD" });
-      element.reset(); setState("sent"); router.push("/thank-you/");
+      element.reset();
+      setState("sent");
+      await trackEstimateConversion();
+      router.push("/thank-you/");
     } catch { setState("error"); }
   }
 
