@@ -8,14 +8,14 @@ declare global {
   }
 }
 
-const phoneConversion = "AW-1034233006/igMnCLT_i_0DEK7JlO0D";
+// A phone-link click indicates intent; connected calls are measured separately by Google.
 
 export default function GoogleAdsTracking() {
   useEffect(() => {
     function trackPhoneClick(event: MouseEvent) {
       const link = (event.target as Element | null)?.closest<HTMLAnchorElement>('a[href^="tel:+12152038666"], a[href^="tel:2152038666"]');
       if (!link) return;
-      window.gtag?.("event", "conversion", { send_to: phoneConversion });
+      window.gtag?.("event", "phone_click", { event_category: "contact" });
     }
 
     document.addEventListener("click", trackPhoneClick);

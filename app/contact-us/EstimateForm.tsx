@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 const estimateConversion = "AW-1034233006/-iDbCJHYzoEdEK7JlO0D";
 
-function trackEstimateConversion() {
+function trackEstimateConversion(estimateId: string) {
   return new Promise<void>((resolve) => {
     if (!window.gtag) {
       resolve();
@@ -21,6 +21,7 @@ function trackEstimateConversion() {
 
     window.gtag("event", "conversion", {
       send_to: estimateConversion,
+      transaction_id: estimateId,
       value: 1,
       currency: "USD",
       event_callback: finish,
@@ -35,15 +36,19 @@ export default function EstimateForm() {
   const router = useRouter();
   const [state, setState] = useState<"idle" | "sending" | "sent" | "error">("idle");
   async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault(); setState("sending");
+    event.preventDefault();
+    if (state === "sending") return;
+    setState("sending");
     const element = event.currentTarget; const form = new FormData(element);
     const estimate = Object.fromEntries(form.entries());
     try {
       const response = await fetch("/.netlify/functions/estimates", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(estimate) });
-      if (!response.ok) throw new Error("Submission failed");
+      if (response.status !== 201) throw new Error("Submission failed");
+      const saved = await response.json();
+      if (!saved.ok || typeof saved.id !== "string" || !saved.id) throw new Error("Estimate was not saved");
       element.reset();
       setState("sent");
-      await trackEstimateConversion();
+      await trackEstimateConversion(saved.id).catch(() => undefined);
       router.push("/thank-you/");
     } catch { setState("error"); }
   }
