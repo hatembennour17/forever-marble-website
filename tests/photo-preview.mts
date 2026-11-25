@@ -3,6 +3,7 @@ import http from "node:http";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { mutatePhotos, readPhotos, type PhotoStore } from "../netlify/functions/_lib/photos.js";
+import { mutateSpecials, readSpecials } from "../netlify/functions/_lib/specials.js";
 const values = new Map<string, unknown>(); let version = 0;
 const users = [{ id: "local-preview", email: "preview@example.test", role: "admin", active: true, createdAt: new Date().toISOString() }];
 const store = {
@@ -38,6 +39,9 @@ http.createServer(async (request, response) => {
         const blob = values.get(`files/${url.searchParams.get("id")}`) as Blob | undefined;
         if (!blob) { response.writeHead(404).end(); return; }
         response.writeHead(200, { "content-type": "image/jpeg" }); response.end(Buffer.from(await blob.arrayBuffer())); return;
+      } else if (url.pathname.endsWith("specials")) {
+        if (request.method === "POST") { let body = ""; for await (const part of request) body += part; data = await mutateSpecials(store, JSON.parse(body)); }
+        else { const current = await readSpecials(store); data = url.searchParams.has("admin") ? current : { specials: current.specials.filter((deal) => !deal.hidden) }; }
       } else if (url.pathname.endsWith("photos")) {
         if (request.method === "POST") {
           let body = ""; for await (const part of request) body += part;

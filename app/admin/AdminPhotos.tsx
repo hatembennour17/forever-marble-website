@@ -2,30 +2,8 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import type { Photo } from "@/app/lib/photo-catalog";
+import { imagePayload } from "@/app/lib/image-upload";
 
-async function imagePayload(file: File) {
-  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 15 * 1024 * 1024)
-    throw new Error("Choose a JPG, PNG or WebP photo up to 15 MB.");
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, 2400 / Math.max(bitmap.width, bitmap.height));
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.max(1, Math.round(bitmap.width * scale));
-  canvas.height = Math.max(1, Math.round(bitmap.height * scale));
-  const context = canvas.getContext("2d");
-  if (!context) { bitmap.close(); throw new Error("This browser cannot prepare photos. Please try another browser."); }
-  context.drawImage(bitmap, 0, 0, canvas.width, canvas.height); bitmap.close();
-  const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
-  let transparent = false;
-  for (let index = 3; index < pixels.length; index += 4) { if (pixels[index] < 255) { transparent = true; break; } }
-  const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob((value) => value ? resolve(value) : reject(new Error("Unable to prepare photo")), transparent ? "image/png" : "image/jpeg", .88));
-  if (blob.size > 3 * 1024 * 1024) throw new Error("This photo is still too large. Please choose a smaller image.");
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result).split(",")[1]);
-    reader.onerror = () => reject(new Error("Unable to read the selected image."));
-    reader.readAsDataURL(blob);
-  });
-}
 
 function PhotoEditor({ photo, busy, onSave }: { photo?: Photo; busy: boolean; onSave: (values: Record<string, unknown>) => Promise<boolean> }) {
   const [file, setFile] = useState<File | null>(null);
@@ -91,14 +69,14 @@ export default function AdminPhotos() {
     finally { setBusy(false); }
   }
   const gallery = photos.filter((photo) => photo.section === "gallery" && !photo.hidden).sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));
-  const visible = photos.filter((photo) => photo.section === section && `${photo.label} ${photo.alt} ${photo.pages.join(" ")}`.toLowerCase().includes(query.toLowerCase())).sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
+  const visible = photos.filter((photo) => photo.section === section && !photo.originalSrc?.startsWith("/images/specials-slabs/") && `${photo.label} ${photo.alt} ${photo.pages.join(" ")}`.toLowerCase().includes(query.toLowerCase())).sort((a, b) => a.order - b.order || a.label.localeCompare(b.label));
   return <div className="admin-photos">
     <p>Upload JPG, PNG or WebP photos up to 15 MB. Photos are resized automatically. Preview your image, add a description, then publish when ready.</p>
     <div className="photo-toolbar"><div className="admin-tabs"><button aria-pressed={section === "gallery"} className={section === "gallery" ? "active" : ""} onClick={() => setSection("gallery")}>Gallery photos</button><button aria-pressed={section === "site"} className={section === "site" ? "active" : ""} onClick={() => setSection("site")}>Website images</button></div><button className="button outline" onClick={() => void load()} disabled={busy || loading}>Refresh photos</button><a className="button outline" href={section === "gallery" ? "/gallery/" : "/"} target="_blank" rel="noreferrer">View website ↗</a></div>
     {message ? <p className="photo-success" role="status">{message}</p> : null}
     {error ? <p className="admin-error" role="alert">{error}</p> : null}
     {loading ? <p role="status">Loading photos…</p> : photos.length ? <>
-      {section === "gallery" ? <details className="photo-add" open><summary>Add a gallery photo</summary><PhotoEditor busy={busy} onSave={save} /></details> : <p className="photo-hint">Some images are shared across pages. Replacing one updates every location listed on its card. Original images remain available through Restore original.</p>}
+      {section === "gallery" ? <details className="photo-add" open><summary>Add a gallery photo</summary><PhotoEditor busy={busy} onSave={save} /></details> : <p className="photo-hint">Special offer photos and prices are managed in the Specials tab. Some images are shared across pages. Replacing one updates every location listed on its card. Original images remain available through Restore original.</p>}
       <label className="photo-search">Find a photo<input placeholder="Search by page, description or image name" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
       <div className="photo-grid">{visible.map((photo) => <article className={`photo-card${photo.hidden ? " photo-hidden" : ""}`} key={`${photo.id}:${photo.src}`}>
         <h2>{photo.section === "gallery" ? photo.alt : photo.label}</h2>

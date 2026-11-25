@@ -6,6 +6,8 @@ import { defaultPhotos } from "../app/lib/photo-catalog";
 import { mutatePhotos, readPhotos, type PhotoStore } from "../netlify/functions/_lib/photos";
 import photosHandler from "../netlify/functions/photos.mjs";
 import fileHandler from "../netlify/functions/photo-file.mjs";
+import { mutateSpecials, readSpecials } from "../netlify/functions/_lib/specials";
+import specialsHandler from "../netlify/functions/specials.mjs";
 
 test("public callers cannot read the editor manifest or upload photos", async () => {
   const editor = await photosHandler(new Request("https://example.test/.netlify/functions/photos?admin=1"));
@@ -20,11 +22,12 @@ test("unsupported methods and invalid file IDs are rejected before accessing sto
 
 export function memoryStore() {
   const files = new Map<string, unknown>(); let version = 0;
+  const versions = new Map<string, string>();
   const store = {
-    async getWithMetadata(key: string) { return files.has(key) ? { data: structuredClone(files.get(key)), etag: String(version), metadata: {} } : null; },
+    async getWithMetadata(key: string) { return files.has(key) ? { data: structuredClone(files.get(key)), etag: versions.get(key), metadata: {} } : null; },
     async setJSON(key: string, value: unknown, options: { onlyIfNew?: boolean; onlyIfMatch?: string } = {}) {
-      if ((options.onlyIfNew && files.has(key)) || (options.onlyIfMatch && options.onlyIfMatch !== String(version))) return { modified: false };
-      files.set(key, structuredClone(value)); return { modified: true, etag: String(++version) };
+      if ((options.onlyIfNew && files.has(key)) || (options.onlyIfMatch && options.onlyIfMatch !== versions.get(key))) return { modified: false };
+      files.set(key, structuredClone(value)); versions.set(key, String(++version)); return { modified: true, etag: versions.get(key) };
     },
     async set(key: string, value: unknown) { files.set(key, value); return { modified: true, etag: "file" }; },
     async get(key: string) { return files.get(key) || null; },
@@ -87,4 +90,50 @@ test("shared site photos cannot be hidden and descriptions are required", async 
   const { store } = memoryStore(); const photo = defaultPhotos.find((photo) => photo.section === "site")!;
   await assert.rejects(mutatePhotos(store, { action: "visibility", id: photo.id, hidden: true, revision: "" }), /Invalid/);
   await assert.rejects(mutatePhotos(store, { action: "describe", id: photo.id, alt: "", revision: "" }), /description/);
+});
+
+test("specials preserve all original offers and save image and price updates together", async () => {
+  const { store, files } = memoryStore();
+  const original = await readSpecials(store);
+  assert.equal(original.specials.length, 11);
+  const first = original.specials[0];
+  assert.equal(first.name, "Azul Platino"); assert.equal(first.price, 34.99);
+  const image = PNG.sync.write(new PNG({ width: 8, height: 8 })).toString("base64");
+  const changed = await mutateSpecials(store, { action: "save", id: first.id, name: "New slab special", before: 69.99, price: 42.99, minimumSqFt: 65, alt: "Updated stone photo", image, revision: original.revision });
+  const saved = changed.specials[0];
+  assert.equal(saved.price, 42.99); assert.equal(saved.minimumSqFt, 65); assert.match(saved.image, /photo-file\?id=/);
+  assert.deepEqual(changed.specials[1], original.specials[1]);
+  assert.equal(files.has("manifest.json"), false, "special updates do not overwrite photo settings");
+  assert.equal((await readSpecials(store)).specials[0].name, "New slab special");
+  await assert.rejects(mutateSpecials(store, { action: "visibility", id: first.id, hidden: true, revision: "" }), /another session/);
+});
+
+test("specials can be added, reordered, hidden and shown without losing saved prices", async () => {
+  const { store } = memoryStore();
+  const image = PNG.sync.write(new PNG({ width: 8, height: 8 })).toString("base64");
+  let result = await mutateSpecials(store, { action: "save", name: "New offer", before: null, price: 50, minimumSqFt: 0, alt: "New stone", image, revision: "" });
+  assert.equal(result.specials.length, 12);
+  const id = result.specials[11].id;
+  result = await mutateSpecials(store, { action: "move", id, direction: "up", revision: result.revision });
+  assert.equal(result.specials.filter((deal) => !deal.hidden).sort((a, b) => a.order - b.order).at(-2)?.id, id);
+  result = await mutateSpecials(store, { action: "visibility", id, hidden: true, revision: result.revision });
+  assert.equal(result.specials.find((deal) => deal.id === id)?.hidden, true);
+  result = await mutateSpecials(store, { action: "visibility", id, hidden: false, revision: result.revision });
+  assert.equal(result.specials.find((deal) => deal.id === id)?.price, 50);
+});
+
+test("invalid special prices and uploads cannot partially change an offer", async () => {
+  const { store, files } = memoryStore(); const original = (await readSpecials(store)).specials[0];
+  const values = { action: "save", id: original.id, name: "Update", before: 50, price: 40, minimumSqFt: 50, alt: "Stone", revision: "" };
+  for (const fields of [{ price: -1 }, { price: NaN }, { before: 30 }, { minimumSqFt: 2.5 }, { image: Buffer.from("bad image").toString("base64") }]) {
+    await assert.rejects(mutateSpecials(store, { ...values, ...fields }));
+  }
+  assert.equal(files.has("specials.json"), false);
+  assert.equal((await readSpecials(store)).specials[0].price, original.price);
+});
+
+test("special editing requires authentication and rejects unsupported methods", async () => {
+  assert.equal((await specialsHandler(new Request("https://example.test/.netlify/functions/specials?admin=1"))).status, 401);
+  assert.equal((await specialsHandler(new Request("https://example.test/.netlify/functions/specials", { method: "POST", body: "{}" }))).status, 401);
+  assert.equal((await specialsHandler(new Request("https://example.test/.netlify/functions/specials", { method: "DELETE" }))).status, 405);
 });

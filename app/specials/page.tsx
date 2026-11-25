@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "@/app/components/ManagedImage";
 import Link from "next/link";
+import CurrentSpecials from "@/app/components/CurrentSpecials";
 
 export const metadata: Metadata = {
   title: "Countertop Specials & Granite Deals in Philadelphia",
@@ -13,19 +14,6 @@ export const metadata: Metadata = {
   },
 };
 
-const deals = [
-  { name: "Azul Platino", before: "$49.99", now: "$34.99/SF", image: "/images/specials-slabs/azul-platino.jpg" },
-  { name: "Genesis", before: "$65.99", now: "$49.99/SF", image: "/images/specials-slabs/genesis.jpg" },
-  { name: "Caffe Latte", before: "$65.99", now: "$49.99/SF", image: "/images/specials-slabs/caffe-latte.jpg" },
-  { name: "Santa Cecilia", before: "$55.99", now: "$34.99/SF", image: "/images/specials-slabs/santa-cecilia.jpg" },
-  { name: "Steel Grey", before: "$54.99", now: "$44.99/SF", image: "/images/specials-slabs/steel-grey.jpg" },
-  { name: "Brazilian Black", before: "$55.99", now: "$34.99/SF", image: "/images/specials-slabs/brazilian-black.jpg" },
-  { name: "Arctic Pearl", before: "$59.99", now: "$39.99/SF", image: "/images/specials-slabs/arctic-pearl.jpg" },
-  { name: "Giallo Vicenza", before: "$59.99", now: "$44.99/SF", image: "/images/specials-slabs/giallo-vicenza.jpg" },
-  { name: "Fantasy Brown", before: "$65.99", now: "$49.99/SF", image: "/images/specials-slabs/fantasy-brown.jpg" },
-  { name: "Patagonia Granite", before: "$79.99", now: "$59.99/SF", image: "/images/specials-slabs/patagonia-granite.jpg" },
-  { name: "Emerald Pearl", before: "$75.99", now: "$59.99/SF", image: "/images/specials-slabs/emerald-pearl.jpg" },
-];
 
 export default function SpecialsPage() {
   return <>
@@ -48,18 +36,7 @@ export default function SpecialsPage() {
             <a className="button outline" href="tel:+12152038666">Call (215) 203-8666</a>
           </div>
         </div>
-        <div className="specials-grid">
-          {deals.map((deal) => (
-            <article className="special-card" key={deal.name}>
-              <h2>{deal.name}</h2>
-              <div className="special-card-image">
-                <Image src={deal.image} alt={`${deal.name} countertop slab special`} fill sizes="(max-width: 900px) 50vw, 33vw" />
-              </div>
-              <p><span>{deal.before}</span> now <strong>{deal.now}</strong></p>
-              <small>Minimum 50 SF</small>
-            </article>
-          ))}
-        </div>
+        <CurrentSpecials />
       </div>
     </section>
 

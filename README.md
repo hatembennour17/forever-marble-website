@@ -33,3 +33,9 @@ Sign in at `/admin/` with an existing administrator or staff account and choose 
 
 Validation: `pnpm test`, `pnpm exec tsc --noEmit`, `pnpm build`. For an isolated browser preview, run `pnpm build` then `pnpm preview:photos` and open `http://127.0.0.1:3210/admin/`. The preview uses in-memory sample authentication and image storage only, binds to localhost, and never changes production data. It is not a Netlify function.
 
+
+## Specials management
+
+Sign in at `/admin/` and choose the separate **Specials** tab. Search for an offer, replace its image, edit its name, original price, sale price per square foot and minimum square footage, then click **Publish changes**. The image and prices are saved together. Leave original price blank to omit the crossed-out price; a zero minimum hides the minimum line. Use **Add a new special**, **Move up / Move down** and **Hide special / Show special** to manage the offer list. Both staff and administrators can manage specials.
+
+The existing eleven offers are the initial defaults. Offer settings are stored separately from photo settings in `specials.json`; uploaded images use the existing authenticated photo storage and validation. Existing image overrides are respected until an offer receives its own replacement. Offer images are managed in Specials rather than duplicated in the Photos editor. Reload the public `/specials/` page after publishing. The public page requests current prices and shows a contact message if they cannot be loaded, rather than displaying stale fallback prices.

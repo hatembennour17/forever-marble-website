@@ -28,37 +28,14 @@ export async function mutatePhotos(store: PhotoStore, body: Record<string, unkno
     if (body.id && !photo) throw new PhotoError(404, "Photo not found");
     if (!photo && photos.filter((item) => item.section === "gallery").length >= 200)
       throw new PhotoError(400, "The gallery supports up to 200 photos. Replace an existing photo instead.");
-    if (typeof body.image !== "string" || body.image.length > 4 * 1024 * 1024 || !/^[A-Za-z0-9+/]+={0,2}$/.test(body.image))
-      throw new PhotoError(400, "Choose a JPG, PNG or WebP image smaller than 3 MB.");
     if (typeof body.alt !== "string" || !body.alt.trim() || body.alt.length > 240)
       throw new PhotoError(400, "Add a description of the photo (up to 240 characters).");
-    const bytes = Buffer.from(body.image, "base64");
-    if (bytes.length > 3 * 1024 * 1024) throw new PhotoError(400, "Image must be smaller than 3 MB.");
-    let output: Buffer;
-    let contentType: string;
-    try {
-      if (bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) {
-        const width = bytes.readUInt32BE(16), height = bytes.readUInt32BE(20);
-        if (!width || !height || width > 2400 || height > 2400) throw new Error("Image too large");
-        const decoded = PNG.sync.read(bytes, { checkCRC: true });
-        output = PNG.sync.write({ width: decoded.width, height: decoded.height, data: decoded.data } as PNG);
-        contentType = "image/png";
-      } else if (bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255) {
-        const decoded = jpeg.decode(bytes, { maxResolutionInMP: 6, maxMemoryUsageInMB: 128, tolerantDecoding: false });
-        if (!decoded.width || !decoded.height || decoded.width > 2400 || decoded.height > 2400) throw new Error("Image too large");
-        output = Buffer.from(jpeg.encode({ width: decoded.width, height: decoded.height, data: decoded.data }, 88).data);
-        contentType = "image/jpeg";
-      } else throw new Error("Unsupported image");
-      if (output.length > 3 * 1024 * 1024) throw new Error("Image too large");
-    } catch { throw new PhotoError(400, "Unable to prepare this image. Try a smaller JPG, PNG or WebP photo using the upload control."); }
-    const fileId = randomUUID();
-    // Re-encoding strips embedded metadata and produces a safe, immutable raster image.
-    await store.set(`files/${fileId}`, new Blob([new Uint8Array(output)]), { metadata: { contentType } });
+    const uploadedSrc = await storeUploadedPhoto(store, body.image);
     if (!photo) {
       photo = { id: `gallery-${randomUUID()}`, src: "", alt: "", label: "Gallery photo", section: "gallery", order: Math.max(0, ...photos.filter((item) => item.section === "gallery").map((item) => item.order)) + 1, hidden: false, pages: ["gallery"] };
       photos.push(photo);
     }
-    photo.src = `/.netlify/functions/photo-file?id=${fileId}`;
+    photo.src = uploadedSrc;
     photo.alt = body.alt.trim();
     photo.hidden = false;
   } else {
@@ -83,4 +60,32 @@ export async function mutatePhotos(store: PhotoStore, body: Record<string, unkno
   const result = await store.setJSON("manifest.json", { photos }, current.revision ? { onlyIfMatch: current.revision } : { onlyIfNew: true });
   if (!result.modified) throw new PhotoError(409, "Photos changed in another session. Refresh and try again.");
   return { photos, revision: result.etag || "" };
+}
+
+export async function storeUploadedPhoto(store: PhotoStore, image: unknown) {
+  if (typeof image !== "string" || image.length > 4 * 1024 * 1024 || !/^[A-Za-z0-9+/]+={0,2}$/.test(image))
+    throw new PhotoError(400, "Choose a JPG, PNG or WebP image smaller than 3 MB.");
+  const bytes = Buffer.from(image, "base64");
+  if (bytes.length > 3 * 1024 * 1024) throw new PhotoError(400, "Image must be smaller than 3 MB.");
+  let output: Buffer;
+  let contentType: string;
+  try {
+    if (bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) {
+      const width = bytes.readUInt32BE(16), height = bytes.readUInt32BE(20);
+      if (!width || !height || width > 2400 || height > 2400) throw new Error("Image too large");
+      const decoded = PNG.sync.read(bytes, { checkCRC: true });
+      output = PNG.sync.write({ width: decoded.width, height: decoded.height, data: decoded.data } as PNG);
+      contentType = "image/png";
+    } else if (bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255) {
+      const decoded = jpeg.decode(bytes, { maxResolutionInMP: 6, maxMemoryUsageInMB: 128, tolerantDecoding: false });
+      if (!decoded.width || !decoded.height || decoded.width > 2400 || decoded.height > 2400) throw new Error("Image too large");
+      output = Buffer.from(jpeg.encode({ width: decoded.width, height: decoded.height, data: decoded.data }, 88).data);
+      contentType = "image/jpeg";
+    } else throw new Error("Unsupported image");
+    if (output.length > 3 * 1024 * 1024) throw new Error("Image too large");
+  } catch { throw new PhotoError(400, "Unable to prepare this image. Try a smaller JPG, PNG or WebP photo using the upload control."); }
+  const fileId = randomUUID();
+  // Re-encoding strips embedded metadata and produces a safe, immutable raster image.
+  await store.set(`files/${fileId}`, new Blob([new Uint8Array(output)]), { metadata: { contentType } });
+    return `/.netlify/functions/photo-file?id=${fileId}`;
 }
