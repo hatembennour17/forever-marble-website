@@ -4,6 +4,19 @@ import jpeg from "jpeg-js";
 import { PNG } from "pngjs";
 import { defaultPhotos } from "../app/lib/photo-catalog";
 import { mutatePhotos, readPhotos, type PhotoStore } from "../netlify/functions/_lib/photos";
+import photosHandler from "../netlify/functions/photos.mjs";
+import fileHandler from "../netlify/functions/photo-file.mjs";
+
+test("public callers cannot read the editor manifest or upload photos", async () => {
+  const editor = await photosHandler(new Request("https://example.test/.netlify/functions/photos?admin=1"));
+  const upload = await photosHandler(new Request("https://example.test/.netlify/functions/photos", { method: "POST", headers: { "content-type": "application/json", origin: "https://example.test" }, body: "{}" }));
+  assert.equal(editor.status, 401); assert.equal(upload.status, 401);
+});
+
+test("unsupported methods and invalid file IDs are rejected before accessing storage", async () => {
+  assert.equal((await photosHandler(new Request("https://example.test/.netlify/functions/photos", { method: "DELETE" }))).status, 405);
+  assert.equal((await fileHandler(new Request("https://example.test/.netlify/functions/photo-file?id=../users"))).status, 404);
+});
 
 export function memoryStore() {
   const files = new Map<string, unknown>(); let version = 0;
