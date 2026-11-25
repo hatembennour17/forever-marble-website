@@ -30,6 +30,7 @@ export default function AdminEstimates() {
   const [status, setStatus] = useState<"All" | EstimateStatus>("All");
   const [tab, setTab] = useState<"estimates" | "users" | "photos">("estimates");
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
 
   async function loadEstimates() { const data = await request("estimates"); setEstimates(data.estimates || []); }
@@ -57,9 +58,21 @@ export default function AdminEstimates() {
   async function removeEstimate(id: string) { if (!confirm("Delete this estimate permanently?")) return; await request("estimates", { method: "DELETE", body: JSON.stringify({ id }) }); setEstimates((items) => items.filter((item) => item.id !== id)); }
 
   async function addUser(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault(); setBusy(true); setError(""); const form = new FormData(event.currentTarget);
-    try { await request("admin-users", { method: "POST", body: JSON.stringify({ email: form.get("email"), password: form.get("password"), role: form.get("role") }) }); event.currentTarget.reset(); await loadUsers(); }
-    catch (e) { setError(e instanceof Error ? e.message : "Unable to add user"); } finally { setBusy(false); }
+    event.preventDefault(); setBusy(true); setError(""); setNotice("");
+    // React clears event.currentTarget once the synchronous submit callback returns.
+    const element = event.currentTarget;
+    const form = new FormData(element);
+    try {
+      const data = await request("admin-users", { method: "POST", body: JSON.stringify({ email: form.get("email"), password: form.get("password"), role: form.get("role") }) });
+      // Use the saved user returned by the API; an immediate storage list can be stale.
+      setUsers((items) => [...items.filter((user) => user.id !== data.user.id), data.user].sort((a, b) => a.email.localeCompare(b.email)));
+      element.reset();
+      setNotice(`User ${data.user.email} was created successfully.`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unable to add user");
+      // An earlier successful save may have shown the old form-reset error.
+      await loadUsers().catch(() => {});
+    } finally { setBusy(false); }
   }
 
   async function toggleUser(user: AdminUser) { await request("admin-users", { method: "PATCH", body: JSON.stringify({ id: user.id, active: !user.active }) }); await loadUsers(); }
@@ -79,6 +92,7 @@ export default function AdminEstimates() {
     <div className="admin-toolbar"><div><p className="eyebrow">Admin dashboard</p><h1>{tab === "estimates" ? "Estimate Requests" : tab === "photos" ? "Website Photos" : "User Management"}</h1><p>{tab === "estimates" ? "Review shared requests from every browser and update their progress." : tab === "photos" ? "Upload and change photos without editing code." : "Create staff accounts, assign passwords and control access."}</p></div><div className="admin-stats" hidden={tab === "photos"}><b>{tab === "estimates" ? estimates.length : users.length}</b><span>{tab === "estimates" ? "Total estimates" : "Users"}</span></div></div>
     <div className="admin-tabs"><button className={tab === "estimates" ? "active" : ""} onClick={() => setTab("estimates")}>Estimates</button><button className={tab === "photos" ? "active" : ""} onClick={() => setTab("photos")}>Photos</button>{session.role === "admin" ? <button className={tab === "users" ? "active" : ""} onClick={() => setTab("users")}>Users</button> : null}</div>
     {error ? <p className="admin-error">{error}</p> : null}
+    {tab === "users" && notice ? <p className="photo-success" role="status">{notice}</p> : null}
     {tab === "estimates" ? <>
       <div className="admin-controls"><label>Search<input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Name, phone, material..." /></label><label>Status<select value={status} onChange={(e) => setStatus(e.target.value as "All" | EstimateStatus)}><option>All</option>{statuses.map((item) => <option key={item}>{item}</option>)}</select></label><button className="button outline" type="button" onClick={() => loadEstimates()}>Refresh</button><button className="button gold" type="button" onClick={exportCsv} disabled={!filtered.length}>Export CSV</button></div>
       {filtered.length ? <div className="estimate-table-wrap"><table className="estimate-table"><thead><tr><th>Customer</th><th>Project</th><th>Submitted</th><th>Status</th><th>Notes</th><th /></tr></thead><tbody>{filtered.map((estimate) => <tr key={estimate.id}><td><b>{estimate.name}</b><a href={`tel:${estimate.phone}`}>{estimate.phone}</a><a href={`mailto:${estimate.email}`}>{estimate.email}</a></td><td><b>{estimate.project}</b><span>{estimate.material}</span></td><td>{formatDate(estimate.createdAt)}</td><td><select value={estimate.status} onChange={(e) => updateStatus(estimate.id, e.target.value as EstimateStatus)}>{statuses.map((item) => <option key={item}>{item}</option>)}</select></td><td>{estimate.message || "No message provided."}</td><td><button onClick={() => removeEstimate(estimate.id)}>Delete</button></td></tr>)}</tbody></table></div> : <div className="admin-empty"><h2>No estimates found</h2><p>New website submissions will appear here automatically.</p></div>}

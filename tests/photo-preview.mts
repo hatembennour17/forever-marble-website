@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { mutatePhotos, readPhotos, type PhotoStore } from "../netlify/functions/_lib/photos.js";
 const values = new Map<string, unknown>(); let version = 0;
+const users = [{ id: "local-preview", email: "preview@example.test", role: "admin", active: true, createdAt: new Date().toISOString() }];
 const store = {
   async getWithMetadata(key: string) { return values.has(key) ? { data: structuredClone(values.get(key)), etag: String(version), metadata: {} } : null; },
   async setJSON(key: string, value: unknown, options: { onlyIfNew?: boolean; onlyIfMatch?: string } = {}) {
@@ -20,7 +21,18 @@ http.createServer(async (request, response) => {
     const url = new URL(request.url!, "http://127.0.0.1:3210");
     if (url.pathname.startsWith("/.netlify/functions/")) {
       let data: unknown = {};
-      if (url.pathname.endsWith("admin-auth")) data = { user: { sub: "local-preview", email: "preview@example.test", role: "staff" } };
+      if (url.pathname.endsWith("admin-auth")) data = { user: { sub: "local-preview", email: "preview@example.test", role: "admin" } };
+      else if (url.pathname.endsWith("admin-users")) {
+        if (request.method === "POST") {
+          let text = ""; for await (const part of request) text += part;
+          const body = JSON.parse(text);
+          // A delayed response reproduces the asynchronous React submit boundary.
+          await new Promise((resolve) => setTimeout(resolve, 150));
+          if (users.some((user) => user.email === body.email)) { response.writeHead(409, { "content-type": "application/json" }); response.end(JSON.stringify({ error: "A user with that email already exists" })); return; }
+          const user = { id: `preview-${users.length}`, email: body.email, role: body.role, active: true, createdAt: new Date().toISOString() };
+          users.push(user); data = { user };
+        } else data = { users };
+      }
       else if (url.pathname.endsWith("estimates")) data = { estimates: [] };
       else if (url.pathname.endsWith("photo-file")) {
         const blob = values.get(`files/${url.searchParams.get("id")}`) as Blob | undefined;
