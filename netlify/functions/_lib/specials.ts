@@ -1,9 +1,17 @@
 import { randomUUID } from "node:crypto";
 import { defaultSpecials, type Special, type SpecialImage } from "../../../app/lib/specials.js";
+import { defaultPhotos, type Photo } from "../../../app/lib/photo-catalog.js";
 import { PhotoError, readPhotos, storeUploadedPhoto, type PhotoStore } from "./photos.js";
 
 function rememberImage(current: SpecialImage, history: SpecialImage[]) {
   return [current, ...history].filter((item, index, items) => items.findIndex((other) => other.image === item.image && other.alt === item.alt) === index).slice(0, 10);
+}
+
+function effectiveImage(image: string, alt: string, photos: Photo[]): SpecialImage {
+  const photo = photos.find((item) => item.originalSrc === image);
+  const original = defaultPhotos.find((item) => item.id === photo?.id);
+  const overridden = photo && (photo.src !== image || photo.alt !== original?.alt);
+  return { image: photo?.src || image, alt: overridden ? photo.alt : alt };
 }
 
 export async function readSpecials(store: PhotoStore) {
@@ -12,10 +20,9 @@ export async function readSpecials(store: PhotoStore) {
   const photos = (await readPhotos(store)).photos;
   const specials = [...defaultSpecials.map((deal) => saved.find((item) => item.id === deal.id) || deal), ...saved.filter((item) => !defaultSpecials.some((deal) => deal.id === item.id))].map((deal) => {
     const original = defaultSpecials.find((item) => item.id === deal.id);
-    const originalPhoto = photos.find((photo) => photo.originalSrc === original?.image);
-    const originalImage = originalPhoto?.src || original?.image;
+    const originalImage = original ? effectiveImage(original.image, original.alt, photos) : undefined;
     // Older replacements did not record history; retain their known original.
-    const fallback = originalImage && deal.image !== originalImage ? [{ image: originalImage, alt: originalPhoto?.alt || original!.alt }] : [];
+    const fallback = originalImage && deal.image !== originalImage.image ? [originalImage] : [];
     return { ...deal, imageHistory: deal.imageHistory || fallback };
   });
   return {
@@ -41,8 +48,7 @@ export async function mutateSpecials(store: PhotoStore, body: Record<string, unk
     const image = body.image ? await storeUploadedPhoto(store, body.image) : deal!.image;
     if (body.image && deal) {
       const photos = (await readPhotos(store)).photos;
-      const currentPhoto = photos.find((photo) => photo.originalSrc === deal!.image);
-      deal.imageHistory = rememberImage({ image: currentPhoto?.src || deal.image, alt: currentPhoto?.alt || deal.alt }, deal.imageHistory || []);
+      deal.imageHistory = rememberImage(effectiveImage(deal.image, deal.alt, photos), deal.imageHistory || []);
     }
     if (!deal) {
       deal = { id: `special-${randomUUID()}`, name: "", before: null, price: 0, minimumSqFt: 0, image: "", alt: "", hidden: false, order: Math.max(0, ...specials.map((item) => item.order)) + 1, imageHistory: [] };

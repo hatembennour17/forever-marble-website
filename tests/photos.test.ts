@@ -147,6 +147,7 @@ test("replacing and restoring a special image preserves prices and supports undo
   assert.equal(result.specials[0].imageHistory[0].image, original.image);
   result = await mutateSpecials(store, { action: "restore-image", id: original.id, historyIndex: 0, revision: result.revision });
   assert.equal(result.specials[0].image, original.image);
+  assert.equal(result.specials[0].alt, original.alt);
   assert.equal(result.specials[0].name, "Updated offer");
   assert.equal(result.specials[0].price, 45); assert.equal(result.specials[0].before, 80); assert.equal(result.specials[0].minimumSqFt, 65);
   assert.equal(result.specials[0].imageHistory[0].image, replacement);
