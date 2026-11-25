@@ -6,6 +6,7 @@ import { mutatePhotos, readPhotos, type PhotoStore } from "../netlify/functions/
 import { mutateSpecials, readSpecials } from "../netlify/functions/_lib/specials.js";
 const values = new Map<string, unknown>(); let version = 0;
 const users = [{ id: "local-preview", email: "preview@example.test", role: "admin", active: true, createdAt: new Date().toISOString() }];
+let signedIn = true;
 const store = {
   async getWithMetadata(key: string) { return values.has(key) ? { data: structuredClone(values.get(key)), etag: String(version), metadata: {} } : null; },
   async setJSON(key: string, value: unknown, options: { onlyIfNew?: boolean; onlyIfMatch?: string } = {}) {
@@ -22,7 +23,11 @@ http.createServer(async (request, response) => {
     const url = new URL(request.url!, "http://127.0.0.1:3210");
     if (url.pathname.startsWith("/.netlify/functions/")) {
       let data: unknown = {};
-      if (url.pathname.endsWith("admin-auth")) data = { user: { sub: "local-preview", email: "preview@example.test", role: "admin" } };
+      if (url.pathname.endsWith("admin-auth")) {
+        if (request.method === "DELETE") { signedIn = false; data = { ok: true }; }
+        else if (!signedIn) { response.writeHead(401, { "content-type": "application/json" }); response.end(JSON.stringify({ error: "Not signed in" })); return; }
+        else data = { user: { sub: "local-preview", email: "preview@example.test", role: "admin" } };
+      }
       else if (url.pathname.endsWith("admin-users")) {
         if (request.method === "POST") {
           let text = ""; for await (const part of request) text += part;

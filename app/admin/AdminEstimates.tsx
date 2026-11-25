@@ -33,6 +33,7 @@ export default function AdminEstimates() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
 
   async function loadEstimates() { const data = await request("estimates"); setEstimates(data.estimates || []); }
   async function loadUsers() { if (session?.role === "admin") { const data = await request("admin-users"); setUsers(data.users || []); } }
@@ -54,7 +55,15 @@ export default function AdminEstimates() {
     finally { setBusy(false); }
   }
 
-  async function logout() { await request("admin-auth", { method: "DELETE" }); setSession(null); setEstimates([]); setUsers([]); }
+  async function logout() {
+    setLoggingOut(true); setError("");
+    try {
+      await request("admin-auth", { method: "DELETE" });
+      setSession(null); setEstimates([]); setUsers([]);
+      // Reload to discard all loaded admin forms and return to the sign-in screen.
+      window.location.replace("/admin/");
+    } catch { setError("Unable to log out. Please try again."); setLoggingOut(false); }
+  }
   async function updateStatus(id: string, next: EstimateStatus) { await request("estimates", { method: "PATCH", body: JSON.stringify({ id, status: next }) }); setEstimates((items) => items.map((item) => item.id === id ? { ...item, status: next } : item)); }
   async function removeEstimate(id: string) { if (!confirm("Delete this estimate permanently?")) return; await request("estimates", { method: "DELETE", body: JSON.stringify({ id }) }); setEstimates((items) => items.filter((item) => item.id !== id)); }
 
@@ -89,7 +98,7 @@ export default function AdminEstimates() {
   if (!session) return <section className="admin-section"><div className="shell admin-login"><p className="eyebrow">Secure administration</p><h1>Admin Login</h1><p>Sign in to manage estimate requests, website photos and authorized users.</p><form onSubmit={login}><label>Email<input name="email" type="email" required autoComplete="username" /></label><label>Password<input name="password" type="password" required autoComplete="current-password" /></label>{error ? <p className="admin-error">{error}</p> : null}<button className="button gold" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button></form></div></section>;
 
   return <section className="admin-section"><div className="shell">
-    <div className="admin-session"><span>Signed in as <b>{session.email}</b></span><button type="button" onClick={logout}>Sign out</button></div>
+    <div className="admin-session"><span>Signed in as <b>{session.email}</b></span><button className="admin-logout" type="button" onClick={logout} disabled={loggingOut}>{loggingOut ? "Logging out…" : "Log out"}</button></div>
     <div className="admin-toolbar"><div><p className="eyebrow">Admin dashboard</p><h1>{tab === "estimates" ? "Estimate Requests" : tab === "photos" ? "Website Photos" : tab === "specials" ? "Specials" : "User Management"}</h1><p>{tab === "estimates" ? "Review shared requests from every browser and update their progress." : tab === "photos" ? "Upload and change photos without editing code." : tab === "specials" ? "Update special offers, photos and prices." : "Create staff accounts, assign passwords and control access."}</p></div><div className="admin-stats" hidden={tab === "photos" || tab === "specials"}><b>{tab === "estimates" ? estimates.length : users.length}</b><span>{tab === "estimates" ? "Total estimates" : "Users"}</span></div></div>
     <div className="admin-tabs"><button className={tab === "estimates" ? "active" : ""} onClick={() => setTab("estimates")}>Estimates</button><button className={tab === "photos" ? "active" : ""} onClick={() => setTab("photos")}>Photos</button><button className={tab === "specials" ? "active" : ""} onClick={() => setTab("specials")}>Specials</button>{session.role === "admin" ? <button className={tab === "users" ? "active" : ""} onClick={() => setTab("users")}>Users</button> : null}</div>
     {error ? <p className="admin-error">{error}</p> : null}

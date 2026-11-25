@@ -8,6 +8,16 @@ import photosHandler from "../netlify/functions/photos.mjs";
 import fileHandler from "../netlify/functions/photo-file.mjs";
 import { mutateSpecials, readSpecials } from "../netlify/functions/_lib/specials";
 import specialsHandler from "../netlify/functions/specials.mjs";
+import { handler as authHandler } from "../netlify/functions/admin-auth.mjs";
+
+test("logout clears the secure session cookie without needing blob storage", async () => {
+  const result = await authHandler({ httpMethod: "DELETE", headers: {} } as never, {} as never, () => {});
+  assert.ok(result);
+  assert.equal(result.statusCode, 200);
+  assert.match(String(result.headers?.["set-cookie"]), /fm_admin=;/);
+  assert.match(String(result.headers?.["set-cookie"]), /Max-Age=0/);
+  assert.match(String(result.headers?.["set-cookie"]), /HttpOnly; Secure/);
+});
 
 test("public callers cannot read the editor manifest or upload photos", async () => {
   const editor = await photosHandler(new Request("https://example.test/.netlify/functions/photos?admin=1"));
