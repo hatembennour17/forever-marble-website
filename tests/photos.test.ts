@@ -173,3 +173,23 @@ test("older special replacements get their original image as a restore option", 
   const result = await readSpecials(store);
   assert.equal(result.specials[0].imageHistory[0].image, original.image);
 });
+
+test("specials headline updates preserve offers and survive subsequent offer edits", async () => {
+  const { store } = memoryStore(); const initial = await readSpecials(store);
+  assert.equal(initial.financeHeadline, "0% APR $0 Down Finance for 24 Months Available!");
+  const changed = await mutateSpecials(store, { action: "save-labels", financeHeadline: "New financing options available", revision: initial.revision });
+  assert.equal(changed.financeHeadline, "New financing options available");
+  assert.deepEqual(changed.specials, initial.specials);
+  const updated = await mutateSpecials(store, { action: "visibility", id: initial.specials[0].id, hidden: true, revision: changed.revision });
+  assert.equal(updated.financeHeadline, "New financing options available");
+  assert.equal((await readSpecials(store)).financeHeadline, "New financing options available");
+  await assert.rejects(mutateSpecials(store, { action: "save-labels", financeHeadline: "Stale edit", revision: initial.revision }), /another session/);
+});
+
+test("specials headline can be hidden and invalid labels are rejected", async () => {
+  const { store } = memoryStore();
+  await assert.rejects(mutateSpecials(store, { action: "save-labels", financeHeadline: "x".repeat(241), revision: "" }), /240 characters/);
+  const hidden = await mutateSpecials(store, { action: "save-labels", financeHeadline: "   ", revision: "" });
+  assert.equal(hidden.financeHeadline, "");
+  assert.equal((await readSpecials(store)).financeHeadline, "");
+});

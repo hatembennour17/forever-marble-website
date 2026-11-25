@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { defaultSpecials, type Special, type SpecialImage } from "../../../app/lib/specials.js";
+import { defaultFinanceHeadline, defaultSpecials, type Special, type SpecialImage } from "../../../app/lib/specials.js";
 import { defaultPhotos, type Photo } from "../../../app/lib/photo-catalog.js";
 import { PhotoError, readPhotos, storeUploadedPhoto, type PhotoStore } from "./photos.js";
 
@@ -27,6 +27,7 @@ export async function readSpecials(store: PhotoStore) {
   });
   return {
     specials,
+    financeHeadline: typeof entry?.data?.financeHeadline === "string" ? entry.data.financeHeadline : defaultFinanceHeadline,
     revision: entry?.etag || "",
   };
 }
@@ -35,9 +36,13 @@ export async function mutateSpecials(store: PhotoStore, body: Record<string, unk
   const current = await readSpecials(store);
   if (typeof body.revision !== "string" || body.revision !== current.revision) throw new PhotoError(409, "Specials changed in another session. Refresh and try again.");
   const specials = current.specials.map((deal) => ({ ...deal }));
+  let financeHeadline = current.financeHeadline;
   let deal = specials.find((item) => item.id === body.id);
   if (body.id && !deal) throw new PhotoError(404, "Special not found");
-  if (body.action === "save") {
+  if (body.action === "save-labels") {
+    if (typeof body.financeHeadline !== "string" || body.financeHeadline.length > 240) throw new PhotoError(400, "Enter a financing headline up to 240 characters, or leave it blank to hide it.");
+    financeHeadline = body.financeHeadline.trim();
+  } else if (body.action === "save") {
     if (typeof body.name !== "string" || !body.name.trim() || body.name.length > 100) throw new PhotoError(400, "Enter a special name (up to 100 characters).");
     if (typeof body.price !== "number" || !Number.isFinite(body.price) || body.price <= 0 || body.price > 99999) throw new PhotoError(400, "Enter a sale price greater than zero.");
     if (body.before !== null && (typeof body.before !== "number" || !Number.isFinite(body.before) || body.before < body.price || body.before > 99999)) throw new PhotoError(400, "The original price must be at least the sale price, or leave it blank.");
@@ -72,7 +77,7 @@ export async function mutateSpecials(store: PhotoStore, body: Record<string, unk
     [ordered[index], ordered[target]] = [ordered[target], ordered[index]];
     ordered.forEach((item, order) => { item.order = order; });
   } else throw new PhotoError(400, "Invalid special action");
-  const result = await store.setJSON("specials.json", { specials }, current.revision ? { onlyIfMatch: current.revision } : { onlyIfNew: true });
+  const result = await store.setJSON("specials.json", { specials, financeHeadline }, current.revision ? { onlyIfMatch: current.revision } : { onlyIfNew: true });
   if (!result.modified) throw new PhotoError(409, "Specials changed in another session. Refresh and try again.");
-  return { specials, revision: result.etag || "" };
+  return { specials, financeHeadline, revision: result.etag || "" };
 }

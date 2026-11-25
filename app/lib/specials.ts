@@ -1,4 +1,5 @@
 export type SpecialImage = { image: string; alt: string };
+export const defaultFinanceHeadline = "0% APR $0 Down Finance for 24 Months Available!";
 export type Special = { id: string; name: string; before: number | null; price: number; minimumSqFt: number; image: string; alt: string; hidden: boolean; order: number; imageHistory?: SpecialImage[] };
 export const defaultSpecials: Special[] = [
   {

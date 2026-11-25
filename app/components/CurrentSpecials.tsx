@@ -1,23 +1,36 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import Image from "./ManagedImage";
 import { formatPrice, type Special } from "@/app/lib/specials";
 
-export default function CurrentSpecials() {
+const SpecialsContext = createContext<{ specials: Special[] | null; financeHeadline: string; error: boolean }>({ specials: null, financeHeadline: "", error: false });
+
+export function SpecialsProvider({ children }: { children: ReactNode }) {
   const [specials, setSpecials] = useState<Special[] | null>(null);
+  const [financeHeadline, setFinanceHeadline] = useState("");
   const [error, setError] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
     function refresh() {
       fetch("/.netlify/functions/specials", { cache: "no-store", signal: controller.signal })
         .then((response) => response.ok ? response.json() : Promise.reject())
-        .then((data) => { if (!Array.isArray(data.specials)) throw new Error(); setSpecials(data.specials); setError(false); })
+        .then((data) => { if (!Array.isArray(data.specials) || typeof data.financeHeadline !== "string") throw new Error(); setSpecials(data.specials); setFinanceHeadline(data.financeHeadline); setError(false); })
         .catch(() => { if (!controller.signal.aborted) setError(true); });
     }
     refresh(); window.addEventListener("focus", refresh);
     return () => { controller.abort(); window.removeEventListener("focus", refresh); };
   }, []);
+  return <SpecialsContext.Provider value={{ specials, financeHeadline, error }}>{children}</SpecialsContext.Provider>;
+}
+
+export function SpecialsHeadline() {
+  const { financeHeadline, error } = useContext(SpecialsContext);
+  return !error && financeHeadline ? <p className="specials-finance">{financeHeadline}</p> : null;
+}
+
+export default function CurrentSpecials() {
+  const { specials, error } = useContext(SpecialsContext);
   if (error) return <p className="specials-message" role="status">Please call (215) 203-8666 for current specials and pricing.</p>;
   if (specials === null) return <p className="specials-message" role="status">Loading current specials…</p>;
   const visible = specials.filter((deal) => !deal.hidden).sort((a, b) => a.order - b.order || a.id.localeCompare(b.id));

@@ -46,7 +46,7 @@ http.createServer(async (request, response) => {
         response.writeHead(200, { "content-type": "image/jpeg" }); response.end(Buffer.from(await blob.arrayBuffer())); return;
       } else if (url.pathname.endsWith("specials")) {
         if (request.method === "POST") { let body = ""; for await (const part of request) body += part; data = await mutateSpecials(store, JSON.parse(body)); }
-        else { const current = await readSpecials(store); data = url.searchParams.has("admin") ? current : { specials: current.specials.filter((deal) => !deal.hidden) }; }
+        else { const current = await readSpecials(store); data = url.searchParams.has("admin") ? current : { specials: current.specials.filter((deal) => !deal.hidden), financeHeadline: current.financeHeadline }; }
       } else if (url.pathname.endsWith("photos")) {
         if (request.method === "POST") {
           let body = ""; for await (const part of request) body += part;

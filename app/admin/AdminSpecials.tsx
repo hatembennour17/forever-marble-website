@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 import { imagePayload } from "@/app/lib/image-upload";
-import { formatPrice, type Special } from "@/app/lib/specials";
+import { defaultFinanceHeadline, formatPrice, type Special } from "@/app/lib/specials";
 import { usePhotos } from "@/app/components/ManagedImage";
 
 function SpecialEditor({ deal, busy, save }: { deal?: Special; busy: boolean; save: (values: Record<string, unknown>) => Promise<boolean> }) {
@@ -65,9 +65,22 @@ function PreviousSpecialImages({ deal, busy, save }: { deal: Special; busy: bool
   </div>;
 }
 
+function SpecialsLabelEditor({ value, busy, save }: { value: string; busy: boolean; save: (values: Record<string, unknown>) => Promise<boolean> }) {
+  const [headline, setHeadline] = useState(value);
+  useEffect(() => { setHeadline(value); }, [value]);
+  return <form className="specials-label-editor" onSubmit={(event) => { event.preventDefault(); void save({ action: "save-labels", financeHeadline: headline }); }}>
+    <h2>Specials page headline</h2>
+    <label>Financing headline<textarea value={headline} onChange={(event) => setHeadline(event.target.value)} maxLength={240} rows={3} disabled={busy} placeholder={defaultFinanceHeadline} /></label>
+    <p className="photo-hint">This is the large label above your offers. Leave it blank to hide it.</p>
+    <div className="specials-label-preview"><span>Preview</span>{headline.trim() ? <p>{headline.trim()}</p> : <p className="photo-hint">The headline will be hidden.</p>}</div>
+    <button className="button gold" disabled={busy}>Publish headline</button>
+  </form>;
+}
+
 export default function AdminSpecials() {
   const [specials, setSpecials] = useState<Special[]>([]);
   const [revision, setRevision] = useState("");
+  const [financeHeadline, setFinanceHeadline] = useState(defaultFinanceHeadline);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -78,7 +91,7 @@ export default function AdminSpecials() {
     try {
       const response = await fetch("/.netlify/functions/specials?admin=1", { cache: "no-store" });
       const data = await response.json(); if (!response.ok) throw new Error(data.error || "Unable to load specials");
-      setSpecials(data.specials); setRevision(data.revision);
+      setSpecials(data.specials); setRevision(data.revision); setFinanceHeadline(data.financeHeadline ?? defaultFinanceHeadline);
     } catch (e) { setError(e instanceof Error ? e.message : "Unable to load specials"); }
     finally { setLoading(false); }
   }
@@ -88,7 +101,7 @@ export default function AdminSpecials() {
     try {
       const response = await fetch("/.netlify/functions/specials", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...values, revision }) });
       const data = await response.json(); if (!response.ok) throw new Error(data.error || "Unable to save special");
-      setSpecials(data.specials); setRevision(data.revision); setMessage(values.action === "restore-image" ? "Previous image restored. Your prices are unchanged. Refresh the Specials page to see it." : "Saved. Your specials are live. Refresh the Specials page to see them."); return true;
+      setSpecials(data.specials); setRevision(data.revision); setFinanceHeadline(data.financeHeadline ?? defaultFinanceHeadline); setMessage(values.action === "save-labels" ? "Headline published. Refresh the Specials page to see it." : values.action === "restore-image" ? "Previous image restored. Your prices are unchanged. Refresh the Specials page to see it." : "Saved. Your specials are live. Refresh the Specials page to see them."); return true;
     } catch (e) { setError(e instanceof Error ? e.message : "Unable to save special"); return false; }
     finally { setBusy(false); }
   }
@@ -99,6 +112,7 @@ export default function AdminSpecials() {
     <div className="photo-toolbar"><button className="button outline" disabled={loading || busy} onClick={() => void load()}>Refresh specials</button><a className="button outline" href="/specials/" target="_blank" rel="noreferrer">View specials ↗</a></div>
     {message ? <p className="photo-success" role="status">{message}</p> : null}{error ? <p className="admin-error" role="alert">{error}</p> : null}
     {loading ? <p role="status">Loading specials…</p> : specials.length ? <>
+      <SpecialsLabelEditor value={financeHeadline} busy={busy} save={save} />
       <details className="photo-add"><summary>Add a new special</summary><SpecialEditor busy={busy} save={save} /></details>
       <label className="photo-search">Find a special<input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search by special name" /></label>
       <div className="photo-grid">{ordered.filter((deal) => deal.name.toLowerCase().includes(query.toLowerCase())).map((deal) => <article className={`photo-card${deal.hidden ? " photo-hidden" : ""}`} key={`${deal.id}:${deal.image}:${deal.name}:${deal.price}:${deal.before}:${deal.minimumSqFt}:${deal.alt}`}>

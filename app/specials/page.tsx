@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "@/app/components/ManagedImage";
 import Link from "next/link";
-import CurrentSpecials from "@/app/components/CurrentSpecials";
+import CurrentSpecials, { SpecialsHeadline, SpecialsProvider } from "@/app/components/CurrentSpecials";
 
 export const metadata: Metadata = {
   title: "Countertop Specials & Granite Deals in Philadelphia",
@@ -26,9 +26,9 @@ export default function SpecialsPage() {
       </div>
     </section>
 
-    <section className="specials-offers">
+    <SpecialsProvider><section className="specials-offers">
       <div className="shell">
-        <p className="specials-finance">0% APR $0 Down Finance for 24 Months Available!</p>
+        <SpecialsHeadline />
         <div className="specials-intro">
           <p>Featured stone deals change quickly. Visit our Philadelphia showroom or contact us to confirm current availability, slab sizes and installed pricing for your project.</p>
           <div className="actions">
@@ -38,7 +38,7 @@ export default function SpecialsPage() {
         </div>
         <CurrentSpecials />
       </div>
-    </section>
+    </section></SpecialsProvider>
 
     <section className="cta slim">
       <div className="shell cta-inner">
