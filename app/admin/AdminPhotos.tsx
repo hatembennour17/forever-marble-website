@@ -14,7 +14,10 @@ async function imagePayload(file: File) {
   const context = canvas.getContext("2d");
   if (!context) { bitmap.close(); throw new Error("This browser cannot prepare photos. Please try another browser."); }
   context.drawImage(bitmap, 0, 0, canvas.width, canvas.height); bitmap.close();
-  const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob((value) => value ? resolve(value) : reject(new Error("Unable to prepare photo")), "image/webp", .88));
+  const pixels = context.getImageData(0, 0, canvas.width, canvas.height).data;
+  let transparent = false;
+  for (let index = 3; index < pixels.length; index += 4) { if (pixels[index] < 255) { transparent = true; break; } }
+  const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob((value) => value ? resolve(value) : reject(new Error("Unable to prepare photo")), transparent ? "image/png" : "image/jpeg", .88));
   if (blob.size > 3 * 1024 * 1024) throw new Error("This photo is still too large. Please choose a smaller image.");
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();

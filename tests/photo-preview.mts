@@ -23,9 +23,9 @@ http.createServer(async (request, response) => {
       if (url.pathname.endsWith("admin-auth")) data = { user: { sub: "local-preview", email: "preview@example.test", role: "staff" } };
       else if (url.pathname.endsWith("estimates")) data = { estimates: [] };
       else if (url.pathname.endsWith("photo-file")) {
-        const blob = values.get(`files/${url.searchParams.get("id")}.webp`) as Blob | undefined;
+        const blob = values.get(`files/${url.searchParams.get("id")}`) as Blob | undefined;
         if (!blob) { response.writeHead(404).end(); return; }
-        response.writeHead(200, { "content-type": "image/webp" }); response.end(Buffer.from(await blob.arrayBuffer())); return;
+        response.writeHead(200, { "content-type": "image/jpeg" }); response.end(Buffer.from(await blob.arrayBuffer())); return;
       } else if (url.pathname.endsWith("photos")) {
         if (request.method === "POST") {
           let body = ""; for await (const part of request) body += part;

@@ -9,7 +9,6 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-  external_node_modules = ["sharp"]
 
 # Preserve high-value legacy URLs with relevant one-hop permanent redirects.
 [[redirects]]

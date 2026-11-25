@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import sharp from "sharp";
+import jpeg from "jpeg-js";
+import { PNG } from "pngjs";
 import { defaultPhotos } from "../app/lib/photo-catalog";
 import { mutatePhotos, readPhotos, type PhotoStore } from "../netlify/functions/_lib/photos";
 
@@ -26,13 +27,13 @@ test("original image catalog remains available when storage has no overrides", a
 
 test("uploads are decoded, re-encoded, persisted, replaced and restored without changing other slots", async () => {
   const { store, files } = memoryStore();
-  const input = await sharp({ create: { width: 80, height: 60, channels: 3, background: "red" } }).jpeg().toBuffer();
+  const input = Buffer.from(jpeg.encode({ width: 80, height: 60, data: Buffer.alloc(80 * 60 * 4, 255) }, 80).data);
   const photo = defaultPhotos.find((photo) => photo.originalSrc === "/images/hero-kitchen.png")!;
   const result = await mutatePhotos(store, { action: "upload", id: photo.id, image: input.toString("base64"), alt: "New kitchen", revision: "" });
   const replacement = result.photos.find((item) => item.id === photo.id)!;
   assert.match(replacement.src, /^\/\.netlify\/functions\/photo-file\?id=/);
   const file = [...files.entries()].find(([key]) => key.startsWith("files/"))![1] as Blob;
-  assert.equal((await sharp(Buffer.from(await file.arrayBuffer())).metadata()).format, "webp");
+  assert.equal(jpeg.decode(Buffer.from(await file.arrayBuffer())).width, 80);
   assert.equal(result.photos.find((item) => item.id !== photo.id)?.src, defaultPhotos.find((item) => item.id !== photo.id)?.src);
   assert.equal((await readPhotos(store)).photos.find((item) => item.id === photo.id)?.alt, "New kitchen");
   const restored = await mutatePhotos(store, { action: "restore", id: photo.id, revision: result.revision });
@@ -41,7 +42,7 @@ test("uploads are decoded, re-encoded, persisted, replaced and restored without 
 
 test("gallery additions, movement, hiding and re-showing persist", async () => {
   const { store } = memoryStore();
-  const image = (await sharp({ create: { width: 8, height: 8, channels: 3, background: "blue" } }).png().toBuffer()).toString("base64");
+  const image = PNG.sync.write(new PNG({ width: 8, height: 8 })).toString("base64");
   let result = await mutatePhotos(store, { action: "upload", image, alt: "New gallery photo", revision: "" });
   const added = result.photos.find((photo) => photo.alt === "New gallery photo")!;
   assert.equal(result.photos.filter((photo) => photo.section === "gallery").length, 13);

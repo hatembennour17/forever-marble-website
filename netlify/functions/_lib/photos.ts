@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
-import sharp from "sharp";
+import jpeg from "jpeg-js";
+import { PNG } from "pngjs";
 import { getStore } from "@netlify/blobs";
 import { defaultPhotos, type Photo } from "../../../app/lib/photo-catalog.js";
 
@@ -34,15 +35,25 @@ export async function mutatePhotos(store: PhotoStore, body: Record<string, unkno
     const bytes = Buffer.from(body.image, "base64");
     if (bytes.length > 3 * 1024 * 1024) throw new PhotoError(400, "Image must be smaller than 3 MB.");
     let output: Buffer;
+    let contentType: string;
     try {
-      const input = sharp(bytes, { limitInputPixels: 40_000_000, animated: false });
-      const meta = await input.metadata();
-      if (!meta.format || !["jpeg", "png", "webp"].includes(meta.format) || (meta.pages || 1) > 1) throw new Error("Unsupported image");
-      output = await input.rotate().resize({ width: 2400, height: 2400, fit: "inside", withoutEnlargement: true }).webp({ quality: 88 }).toBuffer();
-    } catch { throw new PhotoError(400, "This file is not a valid JPG, PNG or WebP photo. Please choose another image."); }
+      if (bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))) {
+        const width = bytes.readUInt32BE(16), height = bytes.readUInt32BE(20);
+        if (!width || !height || width > 2400 || height > 2400) throw new Error("Image too large");
+        const decoded = PNG.sync.read(bytes, { checkCRC: true });
+        output = PNG.sync.write({ width: decoded.width, height: decoded.height, data: decoded.data } as PNG);
+        contentType = "image/png";
+      } else if (bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255) {
+        const decoded = jpeg.decode(bytes, { maxResolutionInMP: 6, maxMemoryUsageInMB: 128, tolerantDecoding: false });
+        if (!decoded.width || !decoded.height || decoded.width > 2400 || decoded.height > 2400) throw new Error("Image too large");
+        output = Buffer.from(jpeg.encode({ width: decoded.width, height: decoded.height, data: decoded.data }, 88).data);
+        contentType = "image/jpeg";
+      } else throw new Error("Unsupported image");
+      if (output.length > 3 * 1024 * 1024) throw new Error("Image too large");
+    } catch { throw new PhotoError(400, "Unable to prepare this image. Try a smaller JPG, PNG or WebP photo using the upload control."); }
     const fileId = randomUUID();
     // Re-encoding strips embedded metadata and produces a safe, immutable raster image.
-    await store.set(`files/${fileId}.webp`, new Blob([new Uint8Array(output)]));
+    await store.set(`files/${fileId}`, new Blob([new Uint8Array(output)]), { metadata: { contentType } });
     if (!photo) {
       photo = { id: `gallery-${randomUUID()}`, src: "", alt: "", label: "Gallery photo", section: "gallery", order: Math.max(0, ...photos.filter((item) => item.section === "gallery").map((item) => item.order)) + 1, hidden: false, pages: ["gallery"] };
       photos.push(photo);

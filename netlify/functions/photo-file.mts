@@ -8,8 +8,10 @@ export const handler: Handler = async (event) => {
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(id)) return json(404, { error: "Photo not found" });
   try {
     initBlobs(event);
-    const bytes = await photoStore().get(`files/${id}.webp`, { type: "arrayBuffer" });
-    if (!bytes) return json(404, { error: "Photo not found" });
-    return { statusCode: 200, headers: { "content-type": "image/webp", "cache-control": "public, max-age=31536000, immutable", "x-content-type-options": "nosniff" }, body: Buffer.from(bytes).toString("base64"), isBase64Encoded: true };
+    const file = await photoStore().getWithMetadata(`files/${id}`, { type: "arrayBuffer" });
+    if (!file) return json(404, { error: "Photo not found" });
+    const contentType = file.metadata.contentType;
+    if (contentType !== "image/jpeg" && contentType !== "image/png") return json(404, { error: "Photo not found" });
+    return { statusCode: 200, headers: { "content-type": contentType, "cache-control": "public, max-age=31536000, immutable", "x-content-type-options": "nosniff" }, body: Buffer.from(file.data).toString("base64"), isBase64Encoded: true };
   } catch { return json(500, { error: "Unable to load photo" }); }
 };
