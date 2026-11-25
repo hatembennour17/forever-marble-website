@@ -137,3 +137,28 @@ test("special editing requires authentication and rejects unsupported methods", 
   assert.equal((await specialsHandler(new Request("https://example.test/.netlify/functions/specials", { method: "POST", body: "{}" }))).status, 401);
   assert.equal((await specialsHandler(new Request("https://example.test/.netlify/functions/specials", { method: "DELETE" }))).status, 405);
 });
+
+test("replacing and restoring a special image preserves prices and supports undo", async () => {
+  const { store } = memoryStore();
+  const original = (await readSpecials(store)).specials[0];
+  const image = PNG.sync.write(new PNG({ width: 8, height: 8 })).toString("base64");
+  let result = await mutateSpecials(store, { action: "save", id: original.id, name: "Updated offer", before: 80, price: 45, minimumSqFt: 65, alt: "Replacement image", image, revision: "" });
+  const replacement = result.specials[0].image;
+  assert.equal(result.specials[0].imageHistory[0].image, original.image);
+  result = await mutateSpecials(store, { action: "restore-image", id: original.id, historyIndex: 0, revision: result.revision });
+  assert.equal(result.specials[0].image, original.image);
+  assert.equal(result.specials[0].name, "Updated offer");
+  assert.equal(result.specials[0].price, 45); assert.equal(result.specials[0].before, 80); assert.equal(result.specials[0].minimumSqFt, 65);
+  assert.equal(result.specials[0].imageHistory[0].image, replacement);
+  result = await mutateSpecials(store, { action: "restore-image", id: original.id, historyIndex: 0, revision: result.revision });
+  assert.equal(result.specials[0].image, replacement);
+  await assert.rejects(mutateSpecials(store, { action: "restore-image", id: original.id, historyIndex: 99, revision: result.revision }), /available previous image/);
+});
+
+test("older special replacements get their original image as a restore option", async () => {
+  const { store } = memoryStore(); const original = (await readSpecials(store)).specials[0];
+  const { imageHistory: _history, ...legacy } = original;
+  await store.setJSON("specials.json", { specials: [{ ...legacy, image: "/.netlify/functions/photo-file?id=legacy-image" }] });
+  const result = await readSpecials(store);
+  assert.equal(result.specials[0].imageHistory[0].image, original.image);
+});

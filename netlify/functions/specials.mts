@@ -10,7 +10,7 @@ export default async (request: Request) => {
     if (request.method !== "GET" && request.method !== "POST") return json(405, { error: "Method not allowed" }, { Allow: "GET, POST" });
     if (request.method === "GET" && url.searchParams.get("admin") !== "1") {
       const current = await readSpecials(photoStore());
-      return json(200, { specials: current.specials.filter((deal) => !deal.hidden) });
+      return json(200, { specials: current.specials.filter((deal) => !deal.hidden).map(({ imageHistory: _history, ...deal }) => deal) });
     }
     const session = requireSession(Object.fromEntries(request.headers.entries()));
     if (!session) return json(401, { error: "Sign in to manage specials." });

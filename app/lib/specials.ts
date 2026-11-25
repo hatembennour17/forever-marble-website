@@ -1,4 +1,5 @@
-export type Special = { id: string; name: string; before: number | null; price: number; minimumSqFt: number; image: string; alt: string; hidden: boolean; order: number };
+export type SpecialImage = { image: string; alt: string };
+export type Special = { id: string; name: string; before: number | null; price: number; minimumSqFt: number; image: string; alt: string; hidden: boolean; order: number; imageHistory?: SpecialImage[] };
 export const defaultSpecials: Special[] = [
   {
     "id": "special-azul-platino",

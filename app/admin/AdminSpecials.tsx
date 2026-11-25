@@ -50,6 +50,21 @@ function SpecialEditor({ deal, busy, save }: { deal?: Special; busy: boolean; sa
   </form>;
 }
 
+function PreviousSpecialImages({ deal, busy, save }: { deal: Special; busy: boolean; save: (values: Record<string, unknown>) => Promise<boolean> }) {
+  const [selected, setSelected] = useState(0);
+  const history = deal.imageHistory || [];
+  if (!history.length) return <p className="photo-hint">After you replace this image, its previous version will be available here.</p>;
+  const index = Math.min(selected, history.length - 1);
+  const previous = history[index];
+  return <div className="special-image-history">
+    <h3>Previous images</h3>
+    <img src={previous.image} alt={`Previous image: ${previous.alt}`} />
+    {history.length > 1 ? <label>Choose previous image<select value={index} disabled={busy} onChange={(event) => setSelected(Number(event.target.value))}>{history.map((item, itemIndex) => <option key={`${item.image}:${itemIndex}`} value={itemIndex}>{itemIndex === 0 ? "Most recent previous image" : `Earlier image ${itemIndex + 1}`}</option>)}</select></label> : null}
+    <p className="photo-hint">Restores the image and its description. Your prices and minimum square footage stay as they are.</p>
+    <button className="button outline" disabled={busy} onClick={() => void save({ action: "restore-image", id: deal.id, historyIndex: index })}>{index === 0 ? "Restore previous image" : "Restore selected image"}</button>
+  </div>;
+}
+
 export default function AdminSpecials() {
   const [specials, setSpecials] = useState<Special[]>([]);
   const [revision, setRevision] = useState("");
@@ -73,7 +88,7 @@ export default function AdminSpecials() {
     try {
       const response = await fetch("/.netlify/functions/specials", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...values, revision }) });
       const data = await response.json(); if (!response.ok) throw new Error(data.error || "Unable to save special");
-      setSpecials(data.specials); setRevision(data.revision); setMessage("Saved. Your specials are live. Refresh the Specials page to see them."); return true;
+      setSpecials(data.specials); setRevision(data.revision); setMessage(values.action === "restore-image" ? "Previous image restored. Your prices are unchanged. Refresh the Specials page to see it." : "Saved. Your specials are live. Refresh the Specials page to see them."); return true;
     } catch (e) { setError(e instanceof Error ? e.message : "Unable to save special"); return false; }
     finally { setBusy(false); }
   }
@@ -89,6 +104,7 @@ export default function AdminSpecials() {
       <div className="photo-grid">{ordered.filter((deal) => deal.name.toLowerCase().includes(query.toLowerCase())).map((deal) => <article className={`photo-card${deal.hidden ? " photo-hidden" : ""}`} key={`${deal.id}:${deal.image}:${deal.name}:${deal.price}:${deal.before}:${deal.minimumSqFt}:${deal.alt}`}>
         <h2>{deal.name}</h2><p className="photo-locations">{deal.hidden ? "Hidden from the Specials page" : "Visible on the Specials page"}</p>
         <SpecialEditor deal={deal} busy={busy} save={save} />
+        <PreviousSpecialImages deal={deal} busy={busy} save={save} />
         <div className="photo-actions">{!deal.hidden ? <><button disabled={busy || active[0]?.id === deal.id} onClick={() => void save({ action: "move", id: deal.id, direction: "up" })}>Move up</button><button disabled={busy || active[active.length - 1]?.id === deal.id} onClick={() => void save({ action: "move", id: deal.id, direction: "down" })}>Move down</button></> : null}<button disabled={busy} onClick={() => void save({ action: "visibility", id: deal.id, hidden: !deal.hidden })}>{deal.hidden ? "Show special" : "Hide special"}</button></div>
       </article>)}</div>
     </> : null}
