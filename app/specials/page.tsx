@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import Image from "@/app/components/ManagedImage";
 import Link from "next/link";
 
 export const metadata: Metadata = {

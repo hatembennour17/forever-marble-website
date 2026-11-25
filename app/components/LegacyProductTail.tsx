@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from "@/app/components/ManagedImage";
 
 const productFaqs = [
   { question: "Why is granite the perfect material for countertops?", answer: "Granite not only elevates the aesthetic of your space but ensures longevity due to its natural durability and resistance to heat, making it ideal for bustling kitchens and bathrooms. Opting for granite means investing in a surface that withstands the test of time and frequent use." },

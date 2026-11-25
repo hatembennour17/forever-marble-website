@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image from "@/app/components/ManagedImage";
 import Link from "next/link";
 
 const materials = [

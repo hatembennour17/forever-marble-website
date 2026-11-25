@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import AdminPhotos from "./AdminPhotos";
 
 type Role = "admin" | "staff";
 type SessionUser = { sub: string; email: string; role: Role };
@@ -27,7 +28,7 @@ export default function AdminEstimates() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<"All" | EstimateStatus>("All");
-  const [tab, setTab] = useState<"estimates" | "users">("estimates");
+  const [tab, setTab] = useState<"estimates" | "users" | "photos">("estimates");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -71,17 +72,17 @@ export default function AdminEstimates() {
   }
 
   if (checking) return <section className="admin-section"><div className="shell admin-empty"><h2>Loading admin…</h2></div></section>;
-  if (!session) return <section className="admin-section"><div className="shell admin-login"><p className="eyebrow">Secure administration</p><h1>Admin Login</h1><p>Sign in to view estimate requests and manage authorized users.</p><form onSubmit={login}><label>Email<input name="email" type="email" required autoComplete="username" /></label><label>Password<input name="password" type="password" required autoComplete="current-password" /></label>{error ? <p className="admin-error">{error}</p> : null}<button className="button gold" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button></form></div></section>;
+  if (!session) return <section className="admin-section"><div className="shell admin-login"><p className="eyebrow">Secure administration</p><h1>Admin Login</h1><p>Sign in to manage estimate requests, website photos and authorized users.</p><form onSubmit={login}><label>Email<input name="email" type="email" required autoComplete="username" /></label><label>Password<input name="password" type="password" required autoComplete="current-password" /></label>{error ? <p className="admin-error">{error}</p> : null}<button className="button gold" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</button></form></div></section>;
 
   return <section className="admin-section"><div className="shell">
     <div className="admin-session"><span>Signed in as <b>{session.email}</b></span><button type="button" onClick={logout}>Sign out</button></div>
-    <div className="admin-toolbar"><div><p className="eyebrow">Admin dashboard</p><h1>{tab === "estimates" ? "Estimate Requests" : "User Management"}</h1><p>{tab === "estimates" ? "Review shared requests from every browser and update their progress." : "Create staff accounts, assign passwords and control access."}</p></div><div className="admin-stats"><b>{tab === "estimates" ? estimates.length : users.length}</b><span>{tab === "estimates" ? "Total estimates" : "Users"}</span></div></div>
-    <div className="admin-tabs"><button className={tab === "estimates" ? "active" : ""} onClick={() => setTab("estimates")}>Estimates</button>{session.role === "admin" ? <button className={tab === "users" ? "active" : ""} onClick={() => setTab("users")}>Users</button> : null}</div>
+    <div className="admin-toolbar"><div><p className="eyebrow">Admin dashboard</p><h1>{tab === "estimates" ? "Estimate Requests" : tab === "photos" ? "Website Photos" : "User Management"}</h1><p>{tab === "estimates" ? "Review shared requests from every browser and update their progress." : tab === "photos" ? "Upload and change photos without editing code." : "Create staff accounts, assign passwords and control access."}</p></div><div className="admin-stats" hidden={tab === "photos"}><b>{tab === "estimates" ? estimates.length : users.length}</b><span>{tab === "estimates" ? "Total estimates" : "Users"}</span></div></div>
+    <div className="admin-tabs"><button className={tab === "estimates" ? "active" : ""} onClick={() => setTab("estimates")}>Estimates</button><button className={tab === "photos" ? "active" : ""} onClick={() => setTab("photos")}>Photos</button>{session.role === "admin" ? <button className={tab === "users" ? "active" : ""} onClick={() => setTab("users")}>Users</button> : null}</div>
     {error ? <p className="admin-error">{error}</p> : null}
     {tab === "estimates" ? <>
       <div className="admin-controls"><label>Search<input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Name, phone, material..." /></label><label>Status<select value={status} onChange={(e) => setStatus(e.target.value as "All" | EstimateStatus)}><option>All</option>{statuses.map((item) => <option key={item}>{item}</option>)}</select></label><button className="button outline" type="button" onClick={() => loadEstimates()}>Refresh</button><button className="button gold" type="button" onClick={exportCsv} disabled={!filtered.length}>Export CSV</button></div>
       {filtered.length ? <div className="estimate-table-wrap"><table className="estimate-table"><thead><tr><th>Customer</th><th>Project</th><th>Submitted</th><th>Status</th><th>Notes</th><th /></tr></thead><tbody>{filtered.map((estimate) => <tr key={estimate.id}><td><b>{estimate.name}</b><a href={`tel:${estimate.phone}`}>{estimate.phone}</a><a href={`mailto:${estimate.email}`}>{estimate.email}</a></td><td><b>{estimate.project}</b><span>{estimate.material}</span></td><td>{formatDate(estimate.createdAt)}</td><td><select value={estimate.status} onChange={(e) => updateStatus(estimate.id, e.target.value as EstimateStatus)}>{statuses.map((item) => <option key={item}>{item}</option>)}</select></td><td>{estimate.message || "No message provided."}</td><td><button onClick={() => removeEstimate(estimate.id)}>Delete</button></td></tr>)}</tbody></table></div> : <div className="admin-empty"><h2>No estimates found</h2><p>New website submissions will appear here automatically.</p></div>}
-    </> : <>
+    </> : tab === "photos" ? <AdminPhotos /> : <>
       <form className="admin-user-form" onSubmit={addUser}><label>Email<input name="email" type="email" required /></label><label>Temporary password<input name="password" type="password" minLength={8} required /></label><label>Role<select name="role"><option value="staff">Staff</option><option value="admin">Administrator</option></select></label><button className="button gold" disabled={busy}>Add user</button></form>
       <div className="admin-user-list">{users.map((user) => <article key={user.id}><div><b>{user.email}</b><span>{user.role} · {user.active ? "Active" : "Disabled"}</span></div><div><button onClick={() => resetPassword(user)}>Reset password</button><button onClick={() => toggleUser(user)}>{user.active ? "Disable" : "Enable"}</button></div></article>)}</div>
     </>}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import Image from "next/image";
+import Image from "@/app/components/ManagedImage";
 import Link from "next/link";
+import ManagedGallery from "@/app/components/ManagedGallery";
 
 export const metadata: Metadata = {
   title: "Gallery | Kitchen & Bathroom Countertop Inspiration",
@@ -13,20 +14,6 @@ export const metadata: Metadata = {
   },
 };
 
-const galleryImages = [
-  { src: "/images/gallery/gallery-n1.jpg", alt: "Bright kitchen with stone countertops and pendant lighting" },
-  { src: "/images/gallery/gallery-n2.jpg", alt: "Modern white kitchen with custom countertops" },
-  { src: "/images/gallery/gallery-n3.jpg", alt: "Kitchen shelving and countertop detail" },
-  { src: "/images/gallery/gallery-n4.jpg", alt: "Custom kitchen countertop and cabinet installation" },
-  { src: "/images/gallery/gallery-n5.jpg", alt: "Kitchen island with polished stone surface" },
-  { src: "/images/gallery/gallery-n6.jpg", alt: "Stone countertop with backsplash and sink" },
-  { src: "/images/gallery/gallery-n7.jpg", alt: "Finished kitchen with marble-look countertop" },
-  { src: "/images/gallery/gallery-n8.jpg", alt: "Contemporary kitchen countertop project" },
-  { src: "/images/gallery/gallery-n9.jpg", alt: "Bathroom vanity and stone surface inspiration" },
-  { src: "/images/gallery/gallery-n10.jpg", alt: "Kitchen stone countertop detail" },
-  { src: "/images/gallery/gallery-n11.jpg", alt: "Installed countertop with clean modern cabinetry" },
-  { src: "/images/gallery/gallery-n12.jpg", alt: "Custom stone kitchen and backsplash design" },
-];
 
 export default function GalleryPage() {
   return <>
@@ -40,13 +27,7 @@ export default function GalleryPage() {
     </section>
 
     <section className="legacy-gallery-section">
-      <div className="shell legacy-gallery-grid">
-        {galleryImages.map((image, index) => (
-          <figure className="legacy-gallery-card" key={image.src}>
-            <Image src={image.src} alt={image.alt} fill sizes="(max-width: 900px) 50vw, 33vw" priority={index < 3} />
-          </figure>
-        ))}
-      </div>
+      <ManagedGallery />
     </section>
 
     <section className="gallery-slogan">

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import AdminEstimates from "./AdminEstimates";
 
 export const metadata: Metadata = {
-  title: "Admin Estimates | Forever Marble",
-  description: "Internal estimate request dashboard for Forever Marble.",
+  title: "Admin Dashboard | Forever Marble",
+  description: "Manage Forever Marble estimates, website photos and authorized users.",
   robots: { index: false, follow: false },
 };
 
